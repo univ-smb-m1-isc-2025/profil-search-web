@@ -1,0 +1,13 @@
+services:
+  profile-search:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./src:/app/src
+      - ./angular.json:/app/angular.json
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
