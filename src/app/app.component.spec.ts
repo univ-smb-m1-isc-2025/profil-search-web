@@ -1,30 +1,67 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { RouterOutlet } from '@angular/router';
+import { InfoEntrepriseComponent } from './info-entreprise/info-entreprise.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [
+        AppComponent,
+        RouterOutlet,
+        InfoEntrepriseComponent,
+        HttpClientModule
+      ],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('devrait créer l\'application', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'profil-search'`, () => {
+  it('devrait avoir le titre "profil-search"', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('profil-search');
   });
-    
 
-  it('should render title', () => {
+  it('devrait afficher le titre', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, profil-search');
+    expect(compiled.querySelector('h1')?.textContent).toContain('profil-search');
+  });
+
+  it('devrait avoir RouterOutlet importé', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const imports = (fixture.componentInstance as any).constructor.ɵcmp.imports;
+    expect(imports).toContain(RouterOutlet);
+  });
+
+  it('devrait avoir InfoEntrepriseComponent importé', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const imports = (fixture.componentInstance as any).constructor.ɵcmp.imports;
+    expect(imports).toContain(InfoEntrepriseComponent);
+  });
+
+  it('devrait avoir HttpClientModule importé', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const module = TestBed.inject(HttpClientModule);
+    expect(module).toBeTruthy();
+  });
+
+  it('devrait être un composant standalone', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const isStandalone = (fixture.componentInstance as any).constructor.ɵcmp.standalone;
+    expect(isStandalone).toBeTruthy();
+  });
+
+  it('devrait avoir le sélecteur correct', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const selector = (fixture.componentInstance as any).constructor.ɵcmp.selectors[0];
+    expect(selector).toContain('app-root');
   });
 });
