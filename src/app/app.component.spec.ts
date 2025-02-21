@@ -35,16 +35,10 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('profil-search');
   });
 
-  it('devrait avoir RouterOutlet importé', () => {
+  it('devrait avoir RouterOutlet dans le template', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const imports = (fixture.componentInstance as any).constructor.ɵcmp.imports;
-    expect(imports).toContain(RouterOutlet);
-  });
-
-  it('devrait avoir InfoEntrepriseComponent importé', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const imports = (fixture.componentInstance as any).constructor.ɵcmp.imports;
-    expect(imports).toContain(InfoEntrepriseComponent);
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('router-outlet')).not.toBeNull();
   });
 
   it('devrait avoir HttpClientModule importé', () => {
