@@ -7,11 +7,13 @@
     (input)="filterJobs()"
     class="border p-2 rounded w-full mb-4"
   />
-  <div *ngFor="let job of filteredJobs" class="border p-4 rounded mb-4">
-    <h2 class="text-xl font-semibold">{{ job.title }}</h2>
-    <p>{{ job.description }}</p>
-    <a [routerLink]="['/job', job.id]" class="text-blue-500"
-      >Voir les détails</a
-    >
+  <div *ngIf="filteredJobs as jobs">
+    <div *ngFor="let job of jobs" class="border p-4 rounded mb-4">
+      <h2 class="text-xl font-semibold">{{ job.title }}</h2>
+      <p>{{ job.description }}</p>
+      <a [routerLink]="['/job', job.id]" class="text-blue-500"
+        >Voir les détails</a
+      >
+    </div>
   </div>
 </div>
