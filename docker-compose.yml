@@ -1,6 +1,6 @@
 services:
   profile-search:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     ports:
