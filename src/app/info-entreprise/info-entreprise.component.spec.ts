@@ -37,7 +37,7 @@ describe('InfoEntrepriseComponent', () => {
     fixture.detectChanges();
 
     expect(component.entreprises).toEqual(mockEntreprises);
-    expect(httpClientSpy.get).toHaveBeenCalledWith('http://host.docker.internal:8080/api/entreprises/all');
+    expect(httpClientSpy.get).toHaveBeenCalledWith('api.profil-search.oups.net/api/entreprises/all');
   });
 
   it('devrait gérer les erreurs lors du chargement des entreprises', () => {
