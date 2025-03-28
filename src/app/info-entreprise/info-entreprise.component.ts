@@ -15,7 +15,7 @@ export class InfoEntrepriseComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.http.get('api.profil-search.oups.net/api/entreprises/all').subscribe({
+    this.http.get('/api/entreprises/all').subscribe({
       next: (data: any) => {
         this.entreprises = data;
         console.log(this.entreprises);
