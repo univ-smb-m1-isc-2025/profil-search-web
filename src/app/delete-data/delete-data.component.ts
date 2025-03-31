@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-delete-data',
-  templateUrl: './delete-data.component.html',
-  styleUrls: ['./delete-data.component.css']
+  templateUrl: './delete-data.component.html'
 })
 export class DeleteDataComponent {
   confirmation: boolean = false;

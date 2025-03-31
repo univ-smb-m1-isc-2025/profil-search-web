@@ -5,8 +5,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-job-application',
-  templateUrl: './job-application.component.html',
-  styleUrls: ['./job-application.component.css']
+  templateUrl: './job-application.component.html'
 })
 export class JobApplicationComponent implements OnInit {
   applicationForm: FormGroup;

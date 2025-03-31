@@ -4,8 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-job-detail',
-  templateUrl: './job-detail.component.html',
-  styleUrls: ['./job-detail.component.css']
+  templateUrl: './job-detail.component.html'
 })
 export class JobDetailComponent implements OnInit {
   job: any;

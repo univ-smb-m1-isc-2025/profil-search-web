@@ -4,8 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-job-management',
-  templateUrl: './job-management.component.html',
-  styleUrls: ['./job-management.component.css']
+  templateUrl: './job-management.component.html'
 })
 export class JobManagementComponent {
   jobForm: FormGroup;
