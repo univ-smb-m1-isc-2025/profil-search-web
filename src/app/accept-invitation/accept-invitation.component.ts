@@ -4,7 +4,9 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-accept-invitation',
-  templateUrl: './accept-invitation.component.html'
+  templateUrl: './accept-invitation.component.html',
+  standalone: true,
+
 })
 export class AcceptInvitationComponent {
   invitationToken: string | null = null;

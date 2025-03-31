@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-user-management',
-  templateUrl: './user-management.component.html'
+  templateUrl: './user-management.component.html',
+  standalone: true,
+  imports: [
+    NgFor
+  ],
+
 })
 export class UserManagementComponent implements OnInit {
   users: any[] = [];

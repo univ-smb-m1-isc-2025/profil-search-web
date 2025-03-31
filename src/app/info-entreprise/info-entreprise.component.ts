@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-info-entreprise',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './info-entreprise.component.html'
+  templateUrl: './info-entreprise.component.html',
 })
 export class InfoEntrepriseComponent implements OnInit {
   entreprises: any[] = [];

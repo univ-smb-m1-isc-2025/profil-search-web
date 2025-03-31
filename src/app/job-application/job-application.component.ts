@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-job-application',
-  templateUrl: './job-application.component.html'
+  templateUrl: './job-application.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    NgFor
+  ],
 })
 export class JobApplicationComponent implements OnInit {
   applicationForm: FormGroup;
