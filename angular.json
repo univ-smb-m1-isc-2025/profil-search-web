@@ -63,11 +63,11 @@
           "configurations": {
             "production": {
               "buildTarget": "profil-search:build:production",
-              "proxyConfig": "proxy_prod.conf.json"
+              "proxyConfig": "src/proxy_prod.conf.json"
             },
             "development": {
               "buildTarget": "profil-search:build:development",
-              "proxyConfig": "proxy_dev.conf.json"
+              "proxyConfig": "src/proxy_dev.conf.json"
             }
           },
           "defaultConfiguration": "development"
