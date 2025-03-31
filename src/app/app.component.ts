@@ -7,9 +7,8 @@ import { InfoEntrepriseComponent } from './info-entreprise/info-entreprise.compo
   standalone: true,
   imports: [RouterOutlet, InfoEntrepriseComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'profil-search';
-  
+
 }
