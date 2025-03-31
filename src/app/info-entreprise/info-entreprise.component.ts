@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { InfoEntrepriseService } from '../services/info-entreprise.service';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../environments/environment';
+import { Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-info-entreprise',
@@ -9,36 +10,25 @@ import { environment } from '../../environments/environment';
   imports: [CommonModule],
   templateUrl: './info-entreprise.component.html',
 })
-export class InfoEntrepriseComponent implements OnInit {
+export class InfoEntrepriseComponent implements OnInit, OnDestroy {
   entreprises: any[] = [];
 
-  constructor(private http: HttpClient) {
-    console.log('InfoEntrepriseComponent initialized');
-    console.log('Environment:', environment);
-  }
+  readonly #service = inject(InfoEntrepriseService);
+  private mySubscription: Subscription | undefined;
 
   ngOnInit(): void {
-    // Create headers with CORS-related options
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    });
+    this.getEntreprises();
+  }
 
-    // Make the request with headers and withCredentials option
-    this.http.get(environment.BASE_API_URL + '/api/entreprises/all', { 
-      headers: headers,
-      withCredentials: false // Set to true only if your API requires credentials
-    }).subscribe({
-      next: (data: any) => {
-        this.entreprises = data;
-        console.log(this.entreprises);
-      },
-      error: (error) => {
-        console.error('Error fetching entreprises:', error);
-      },
-      complete: () => {
-        console.log('Request completed');
-      }
+  getEntreprises(): void {
+    this.mySubscription = this.#service.getEntreprises().subscribe((data: any) => {
+      this.entreprises = data;
     });
+  }
+
+  ngOnDestroy(): void {
+      if (this.mySubscription) {
+        this.mySubscription.unsubscribe();
+      }
   }
 }

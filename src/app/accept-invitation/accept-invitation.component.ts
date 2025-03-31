@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { AcceptInvitationService } from '../services/accept-invitation.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-accept-invitation',
@@ -11,13 +11,25 @@ import { HttpClient } from '@angular/common/http';
 export class AcceptInvitationComponent {
   invitationToken: string | null = null;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {
-    this.invitationToken = this.route.snapshot.queryParamMap.get('token');
+  readonly #service = inject(AcceptInvitationService);
+  private mySubscription: Subscription | undefined;
+  
+  ngOnInit(): void {
+   this.acceptInvitation(); 
+  }
+  
+  acceptInvitation(): void {
+    if (this.invitationToken) {
+      this.mySubscription = this.#service.acceptInvitation(this.invitationToken).subscribe(() => {
+        alert('Votre invitation a été acceptée avec succès.');
+      });
+    }
   }
 
-  acceptInvitation(): void {
-    this.http.post('/api/invitations/accept', { token: this.invitationToken }).subscribe(() => {
-      alert('Invitation acceptée avec succès.');
-    });
+  ngOnDestroy(): void {
+    if (this.mySubscription) {
+      this.mySubscription.unsubscribe();
+    }
   }
+
 }
