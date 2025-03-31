@@ -1,18 +1,27 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnDestroy } from '@angular/core';
+import { DeleteDataService } from '../services/delete-data.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-delete-data',
-  templateUrl: './delete-data.component.html'
+  templateUrl: './delete-data.component.html',
+  standalone: true,
 })
-export class DeleteDataComponent {
+export class DeleteDataComponent implements OnDestroy {
   confirmation: boolean = false;
 
-  constructor(private http: HttpClient) {}
+  readonly #service = inject(DeleteDataService);
+  private mySubscription: Subscription | undefined;
 
   deleteData(): void {
-    this.http.delete('/api/candidate/delete').subscribe(() => {
+    this.mySubscription = this.#service.deleteData().subscribe(() => {
       alert('Vos données ont été supprimées.');
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.mySubscription) {
+      this.mySubscription.unsubscribe();
+    }
   }
 }

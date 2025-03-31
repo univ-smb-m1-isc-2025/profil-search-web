@@ -1,6 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { switchMap, catchError, of } from 'rxjs';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgFor, NgIf } from '@angular/common';
 
 interface Job {
   id: number;
@@ -10,7 +13,16 @@ interface Job {
 
 @Component({
   selector: 'app-job-list',
-  templateUrl: './job-list.component.html'
+  templateUrl: './job-list.component.html',
+  standalone: true,
+  imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule,
+        NgIf,
+        NgFor
+  ],
+
 })
 export class JobListComponent implements OnInit {
   readonly #http = inject(HttpClient);

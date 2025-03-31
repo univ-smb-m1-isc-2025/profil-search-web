@@ -1,10 +1,16 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-job-management',
-  templateUrl: './job-management.component.html'
+  templateUrl: './job-management.component.html',
+  standalone: true,
+  imports: [
+        FormsModule,
+        ReactiveFormsModule,
+  ],
+
 })
 export class JobManagementComponent {
   jobForm: FormGroup;
