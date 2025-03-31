@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../environments/environment';
 
@@ -18,7 +18,17 @@ export class InfoEntrepriseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get(environment.BASE_API_URL + '/api/entreprises/all').subscribe({
+    // Create headers with CORS-related options
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+
+    // Make the request with headers and withCredentials option
+    this.http.get(environment.BASE_API_URL + '/api/entreprises/all', { 
+      headers: headers,
+      withCredentials: false // Set to true only if your API requires credentials
+    }).subscribe({
       next: (data: any) => {
         this.entreprises = data;
         console.log(this.entreprises);
