@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { RouterOutlet } from '@angular/router';
-import { InfoEntrepriseComponent } from './info-entreprise/info-entreprise.component';
+import { InfoEntrepriseComponent } from './components/info-entreprise/info-entreprise.component';
 import { HttpClientModule } from '@angular/common/http';
 
 describe('AppComponent', () => {
