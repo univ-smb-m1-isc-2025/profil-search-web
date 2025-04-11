@@ -10,24 +10,7 @@ import { Subscription } from 'rxjs';
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, SidebarComponent, SearchBarComponent, JobCardComponent],
-  template: `
-    <div class="flex min-h-screen bg-gray-50">
-      <app-sidebar />
-      
-      <div class="flex-1 ml-64">
-        <main class="container mx-auto px-4 py-8">
-          <app-search-bar />
-          
-          <div class="mt-8 grid gap-6 max-w-3xl mx-auto">
-            <app-job-card
-              *ngFor="let job of jobs"
-              [job]="job"
-            />
-          </div>
-        </main>
-      </div>
-    </div>
-  `
+  templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit, OnDestroy {
   jobs: Job[] = [];

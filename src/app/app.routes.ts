@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/entreprise-list/entreprise-list.component').then(m => m.EntrepriseListComponent)
   },
   {
+    path: 'gestion-membres',
+    loadComponent: () => import('./pages/member-list/member-list.component').then(m => m.MemberListComponent)
+  },
+  {
     path: 'postuler/:id',
     loadComponent: () => import('./pages/job-application/job-application.component').then(m => m.JobApplicationComponent)
   }
