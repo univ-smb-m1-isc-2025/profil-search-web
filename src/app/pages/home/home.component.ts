@@ -24,6 +24,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadAllJobs(): void {
+    this.jobService.resetSearch();
+    
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    
     this.subscription = this.jobService.getJobs().subscribe(jobs => {
       this.jobs = jobs;
       this.searchResults = false;

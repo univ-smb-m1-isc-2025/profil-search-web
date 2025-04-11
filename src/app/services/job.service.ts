@@ -58,8 +58,7 @@ export class JobService {
 
   searchJobs(query: string): void {
     if (!query || query.trim() === '') {
-      // Si la requête est vide, afficher tous les jobs
-      this.jobsSubject.next(this.originalJobs);
+      this.resetSearch();
       return;
     }
 
@@ -78,5 +77,10 @@ export class JobService {
     
     // Mettre à jour les résultats
     this.jobsSubject.next(filteredJobs);
+  }
+  
+  resetSearch(): void {
+    // Réinitialiser la recherche en affichant tous les emplois
+    this.jobsSubject.next(this.originalJobs);
   }
 } 
