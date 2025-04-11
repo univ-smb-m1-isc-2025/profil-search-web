@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgFor } from '@angular/common';
+import { JobApplicationService } from '../services/job-application.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-job-application',
@@ -14,37 +15,50 @@ import { NgFor } from '@angular/common';
     NgFor
   ],
 })
-export class JobApplicationComponent implements OnInit {
+export class JobApplicationComponent implements OnInit, OnDestroy {
   applicationForm: FormGroup;
   questions: any[] = [];
   jobId: string | null = null;
+  
+  readonly #service = inject(JobApplicationService);
+  readonly #route = inject(ActivatedRoute);
+  readonly #fb = inject(FormBuilder);
+  private subscription: Subscription | undefined;
 
-  constructor(
-    private route: ActivatedRoute,
-    private http: HttpClient,
-    private fb: FormBuilder
-  ) {
-    this.applicationForm = this.fb.group({});
+  constructor() {
+    this.applicationForm = this.#fb.group({});
   }
 
   ngOnInit(): void {
-    this.jobId = this.route.snapshot.paramMap.get('id');
-    this.http.get(`/api/jobs/${this.jobId}/questions`).subscribe((data: any) => {
+    this.jobId = this.#route.snapshot.paramMap.get('id');
+    if (this.jobId) {
+      this.loadQuestions(this.jobId);
+    }
+  }
+  
+  loadQuestions(jobId: string): void {
+    this.subscription = this.#service.getJobQuestions(jobId).subscribe((data: any) => {
       this.questions = data;
       this.questions.forEach(question => {
         this.applicationForm.addControl(
           question.id,
-          this.fb.control('', Validators.required)
+          this.#fb.control('', Validators.required)
         );
       });
     });
   }
 
   submitApplication(): void {
-    if (this.applicationForm.valid) {
-      this.http.post(`/api/jobs/${this.jobId}/apply`, this.applicationForm.value).subscribe(() => {
+    if (this.applicationForm.valid && this.jobId) {
+      this.#service.submitApplication(this.jobId, this.applicationForm.value).subscribe(() => {
         alert('Votre candidature a été soumise avec succès.');
       });
+    }
+  }
+  
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 }

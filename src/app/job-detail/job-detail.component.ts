@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { NgFor, NgIf } from '@angular/common';
+import { JobDetailService } from '../services/job-detail.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-job-detail',
@@ -12,17 +13,30 @@ import { NgFor, NgIf } from '@angular/common';
     NgIf,
     NgFor
   ],
-
 })
-export class JobDetailComponent implements OnInit {
+export class JobDetailComponent implements OnInit, OnDestroy {
   job: any;
-
-  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+  
+  readonly #service = inject(JobDetailService);
+  readonly #route = inject(ActivatedRoute);
+  private subscription: Subscription | undefined;
 
   ngOnInit(): void {
-    const jobId = this.route.snapshot.paramMap.get('id');
-    this.http.get(`/api/jobs/${jobId}`).subscribe((data: any) => {
+    const jobId = this.#route.snapshot.paramMap.get('id');
+    if (jobId) {
+      this.loadJobDetails(jobId);
+    }
+  }
+  
+  loadJobDetails(jobId: string): void {
+    this.subscription = this.#service.getJobDetails(jobId).subscribe((data: any) => {
       this.job = data;
     });
+  }
+  
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

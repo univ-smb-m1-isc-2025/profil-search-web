@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { NgFor } from '@angular/common';
+import { UserManagementService } from '../services/user-management.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-user-management',
@@ -9,25 +10,35 @@ import { NgFor } from '@angular/common';
   imports: [
     NgFor
   ],
-
 })
-export class UserManagementComponent implements OnInit {
+export class UserManagementComponent implements OnInit, OnDestroy {
   users: any[] = [];
-
-  constructor(private http: HttpClient) {}
+  
+  readonly #service = inject(UserManagementService);
+  private subscription: Subscription | undefined;
 
   ngOnInit(): void {
-    this.http.get('/api/users').subscribe((data: any) => {
+    this.getUsers();
+  }
+  
+  getUsers(): void {
+    this.subscription = this.#service.getUsers().subscribe((data: any) => {
       this.users = data;
     });
   }
 
   deactivateUser(userId: string): void {
     if (confirm('Voulez-vous vraiment désactiver cet utilisateur ?')) {
-      this.http.post(`/api/users/${userId}/deactivate`, {}).subscribe(() => {
+      this.#service.deactivateUser(userId).subscribe(() => {
         alert('Utilisateur désactivé.');
         this.users = this.users.filter(user => user.id !== userId);
       });
+    }
+  }
+  
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 }

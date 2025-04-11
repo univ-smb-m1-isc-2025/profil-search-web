@@ -1,22 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { JobManagementService } from '../services/job-management.service';
 
 @Component({
   selector: 'app-job-management',
   templateUrl: './job-management.component.html',
   standalone: true,
   imports: [
-        FormsModule,
-        ReactiveFormsModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
-
 })
 export class JobManagementComponent {
   jobForm: FormGroup;
+  
+  readonly #service = inject(JobManagementService);
+  readonly #fb = inject(FormBuilder);
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
-    this.jobForm = this.fb.group({
+  constructor() {
+    this.jobForm = this.#fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
       bulletPoints: [''],
@@ -27,7 +29,7 @@ export class JobManagementComponent {
 
   saveJob(): void {
     if (this.jobForm.valid) {
-      this.http.post('/api/jobs', this.jobForm.value).subscribe(() => {
+      this.#service.saveJob(this.jobForm.value).subscribe(() => {
         alert('Offre enregistrée avec succès.');
       });
     }
