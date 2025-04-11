@@ -3,9 +3,30 @@
   
   <div class="flex-1 ml-64">
     <main class="container mx-auto px-4 py-8">
-      <app-search-bar />
+      <app-search-bar (search)="onSearch($event)" />
       
+      <!-- Message de résultats de recherche -->
+      <div *ngIf="searchResults" class="mt-4 mb-2 text-gray-600 text-sm">
+        {{ jobs.length }} résultat(s) trouvé(s)
+        <button 
+          *ngIf="jobs.length === 0" 
+          (click)="loadAllJobs()" 
+          class="text-blue-600 underline ml-2">
+          Réinitialiser la recherche
+        </button>
+      </div>
+      
+      <!-- Liste des emplois -->
       <div class="mt-8 grid gap-6 max-w-3xl mx-auto">
+        <div *ngIf="jobs.length === 0" class="text-center py-12">
+          <p class="text-gray-500">Aucun emploi correspondant à votre recherche</p>
+          <button 
+            (click)="loadAllJobs()" 
+            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Voir tous les emplois
+          </button>
+        </div>
+        
         <app-job-card
           *ngFor="let job of jobs"
           [job]="job"

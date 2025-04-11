@@ -50,8 +50,33 @@ export class JobService {
   ];
 
   private jobsSubject = new BehaviorSubject<Job[]>(this.jobs);
+  private originalJobs = [...this.jobs]; // Garder une copie des jobs originaux
 
   getJobs(): Observable<Job[]> {
     return this.jobsSubject.asObservable();
+  }
+
+  searchJobs(query: string): void {
+    if (!query || query.trim() === '') {
+      // Si la requête est vide, afficher tous les jobs
+      this.jobsSubject.next(this.originalJobs);
+      return;
+    }
+
+    // Convertir la requête en minuscules pour une recherche insensible à la casse
+    const searchTerm = query.toLowerCase().trim();
+    
+    // Filtrer les jobs qui correspondent à la requête
+    const filteredJobs = this.originalJobs.filter(job => {
+      return (
+        job.title.toLowerCase().includes(searchTerm) || 
+        job.company.toLowerCase().includes(searchTerm) || 
+        job.description.toLowerCase().includes(searchTerm) ||
+        job.bulletPoints.some(point => point.toLowerCase().includes(searchTerm))
+      );
+    });
+    
+    // Mettre à jour les résultats
+    this.jobsSubject.next(filteredJobs);
   }
 } 

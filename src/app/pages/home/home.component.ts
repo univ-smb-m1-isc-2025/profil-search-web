@@ -15,13 +15,24 @@ import { Subscription } from 'rxjs';
 export class HomeComponent implements OnInit, OnDestroy {
   jobs: Job[] = [];
   private subscription: Subscription | undefined;
+  searchResults: boolean = false;
 
   constructor(private jobService: JobService) {}
 
   ngOnInit(): void {
+    this.loadAllJobs();
+  }
+
+  loadAllJobs(): void {
     this.subscription = this.jobService.getJobs().subscribe(jobs => {
       this.jobs = jobs;
+      this.searchResults = false;
     });
+  }
+
+  onSearch(query: string): void {
+    this.jobService.searchJobs(query);
+    this.searchResults = true;
   }
 
   ngOnDestroy(): void {

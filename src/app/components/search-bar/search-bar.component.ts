@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-search-bar',
@@ -8,11 +9,34 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './search-bar.component.html'
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnInit, OnDestroy {
+  @Output() search = new EventEmitter<string>();
+  
   searchQuery: string = '';
+  private searchSubject = new Subject<string>();
+  private subscription: Subscription | undefined;
+
+  ngOnInit(): void {
+    // Utiliser le debounce pour éviter trop d'appels pendant que l'utilisateur tape
+    this.subscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.search.emit(query);
+    });
+  }
 
   onSearch(): void {
-    // À implémenter plus tard avec l'API
-    console.log('Recherche:', this.searchQuery);
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  onInputChange(): void {
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 } 
