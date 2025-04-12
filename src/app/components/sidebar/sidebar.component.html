@@ -14,15 +14,32 @@
           <span class="ml-2">Liste des entreprises</span>
         </a>
       </li>
-      <li>
+      <li *ngIf="currentUser">
         <a routerLink="/gestion-membres" class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
           <span class="ml-2">Gestion des membres</span>
         </a>
       </li>
-      <li>
+      <li *ngIf="!currentUser">
         <a routerLink="/connexion" class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
           <span class="ml-2">Connexion</span>
         </a>
+      </li>
+      <li *ngIf="currentUser" class="mt-4">
+        <div class="px-4 py-3 bg-gray-100 rounded-md mx-2">
+          <div class="flex items-center mb-2">
+            <img *ngIf="currentUser.picture" [src]="currentUser.picture" alt="Avatar" class="w-8 h-8 rounded-full mr-2">
+            <div *ngIf="!currentUser.picture" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white mr-2">
+              {{ currentUser.name.charAt(0) }}
+            </div>
+            <p class="text-sm font-medium">{{ currentUser.name }}</p>
+          </div>
+          <button 
+            (click)="logout()" 
+            class="w-full text-center py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition"
+          >
+            Déconnexion
+          </button>
+        </div>
       </li>
     </ul>
   </nav>

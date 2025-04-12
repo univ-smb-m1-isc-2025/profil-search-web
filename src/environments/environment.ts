@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  BASE_API_URL: 'https://api.profil-search.oups.net'
+  BASE_API_URL: 'https://api.profil-search.oups.net',
+  GOOGLE_CLIENT_ID: ''
 };

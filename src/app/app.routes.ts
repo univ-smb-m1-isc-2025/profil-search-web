@@ -26,5 +26,12 @@ export const routes: Routes = [
       import('./pages/job-application/job-application.component')
         .then(m => m.JobApplicationComponent),
     data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'connexion',
+    loadComponent: () => 
+      import('./pages/connexion/connexion.component')
+        .then(m => m.ConnexionComponent),
+    data: { prefetchStrategy: 'viewport' }
   }
 ];
