@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -19,7 +19,9 @@ export class ConnexionComponent implements OnInit {
   constructor(
     private router: Router, 
     private authService: AuthService,
-    @Inject(PLATFORM_ID) platformId: Object
+    @Inject(PLATFORM_ID) platformId: Object,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -63,7 +65,12 @@ export class ConnexionComponent implements OnInit {
   }
 
   handleGoogleLogin(response: any): void {
-    this.authService.loginWithGoogle(response);
+    // Utiliser NgZone pour s'assurer que Angular détecte les changements
+    this.ngZone.run(() => {
+      this.authService.loginWithGoogle(response);
+      // Forcer la détection de changements
+      this.cdr.detectChanges();
+    });
   }
 
   verifyInvitationCode(): void {

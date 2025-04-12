@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
@@ -21,7 +21,8 @@ export class AuthService {
 
   constructor(
     private router: Router,
-    @Inject(PLATFORM_ID) platformId: Object
+    @Inject(PLATFORM_ID) platformId: Object,
+    private ngZone: NgZone
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     
@@ -53,7 +54,11 @@ export class AuthService {
       };
 
       this.setCurrentUser(user);
-      this.router.navigate(['/']);
+      
+      // Utiliser NgZone pour s'assurer que la navigation se fait dans le contexte Angular
+      this.ngZone.run(() => {
+        this.router.navigate(['/']);
+      });
     }
   }
 
