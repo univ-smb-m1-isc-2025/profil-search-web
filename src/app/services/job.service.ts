@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface Job {
   id: number;
@@ -13,7 +13,7 @@ export interface Job {
   providedIn: 'root'
 })
 export class JobService {
-  private jobs: Job[] = [
+  private initialJobs: Job[] = [
     {
       id: 1,
       title: 'Développeur Frontend Angular',
@@ -49,11 +49,10 @@ export class JobService {
     }
   ];
 
-  private jobsSubject = new BehaviorSubject<Job[]>(this.jobs);
-  private originalJobs = [...this.jobs]; // Garder une copie des jobs originaux
+  jobs = signal<Job[]>(this.initialJobs);
 
-  getJobs(): Observable<Job[]> {
-    return this.jobsSubject.asObservable();
+  getJobs(): Job[] {
+    return this.jobs();
   }
 
   searchJobs(query: string): void {
@@ -66,7 +65,7 @@ export class JobService {
     const searchTerm = query.toLowerCase().trim();
     
     // Filtrer les jobs qui correspondent à la requête
-    const filteredJobs = this.originalJobs.filter(job => {
+    const filteredJobs = this.initialJobs.filter(job => {
       return (
         job.title.toLowerCase().includes(searchTerm) || 
         job.company.toLowerCase().includes(searchTerm) || 
@@ -76,11 +75,11 @@ export class JobService {
     });
     
     // Mettre à jour les résultats
-    this.jobsSubject.next(filteredJobs);
+    this.jobs.set(filteredJobs);
   }
   
   resetSearch(): void {
     // Réinitialiser la recherche en affichant tous les emplois
-    this.jobsSubject.next(this.originalJobs);
+    this.jobs.set(this.initialJobs);
   }
 } 

@@ -7,7 +7,7 @@
       
       <!-- Message de résultats de recherche -->
       <div *ngIf="searchResults" class="mt-4 mb-2 text-gray-600 text-sm">
-        {{ jobs.length }} résultat(s) trouvé(s)
+        {{ jobs().length }} résultat(s) trouvé(s)
         <button 
           (click)="loadAllJobs()" 
           class="text-blue-600 underline ml-2">
@@ -17,7 +17,7 @@
       
       <!-- Liste des emplois -->
       <div class="mt-8 grid gap-6 max-w-3xl mx-auto">
-        <div *ngIf="searchResults && jobs.length === 0" class="text-center py-12">
+        <div *ngIf="searchResults && jobs().length === 0" class="text-center py-12">
           <p class="text-gray-500">Aucun emploi correspondant à votre recherche</p>
           <button 
             (click)="loadAllJobs()" 
@@ -27,7 +27,7 @@
         </div>
         
         <app-job-card
-          *ngFor="let job of jobs"
+          *ngFor="let job of jobs()"
           [job]="job"
         />
       </div>

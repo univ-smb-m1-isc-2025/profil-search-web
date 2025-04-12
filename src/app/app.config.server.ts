@@ -1,10 +1,14 @@
 import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
-import { provideServerRendering } from '@angular/platform-server';
+import { provideServerRendering, ɵSERVER_CONTEXT } from '@angular/platform-server';
 import { appConfig } from './app.config';
 
 const serverConfig: ApplicationConfig = {
   providers: [
-    provideServerRendering()
+    provideServerRendering(),
+    {
+      provide: ɵSERVER_CONTEXT,
+      useValue: 'ssr' // Active le mode d'hydratation incrémentielle
+    }
   ]
 };
 

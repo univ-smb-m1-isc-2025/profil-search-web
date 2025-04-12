@@ -8,14 +8,23 @@ export const routes: Routes = [
   },
   {
     path: 'liste-entreprises',
-    loadComponent: () => import('./pages/entreprise-list/entreprise-list.component').then(m => m.EntrepriseListComponent)
+    loadComponent: () => 
+      import('./pages/entreprise-list/entreprise-list.component')
+        .then(m => m.EntrepriseListComponent),
+    data: { prefetchStrategy: 'viewport' }
   },
   {
     path: 'gestion-membres',
-    loadComponent: () => import('./pages/member-list/member-list.component').then(m => m.MemberListComponent)
+    loadComponent: () => 
+      import('./pages/member-list/member-list.component')
+        .then(m => m.MemberListComponent),
+    data: { prefetchStrategy: 'viewport' }
   },
   {
     path: 'postuler/:id',
-    loadComponent: () => import('./pages/job-application/job-application.component').then(m => m.JobApplicationComponent)
+    loadComponent: () => 
+      import('./pages/job-application/job-application.component')
+        .then(m => m.JobApplicationComponent),
+    data: { prefetchStrategy: 'viewport' }
   }
 ];

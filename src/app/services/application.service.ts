@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 export interface ApplicationQuestion {
   id: number;
@@ -8,11 +7,16 @@ export interface ApplicationQuestion {
   required: boolean;
 }
 
+export interface ApplicationSubmission {
+  jobId: number | null;
+  answers: { [key: number]: string };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApplicationService {
-  private questions: ApplicationQuestion[] = [
+  private questionsData: ApplicationQuestion[] = [
     {
       id: 1,
       question: "Combien d'année d'expérience disposez-vous ?",
@@ -33,25 +37,33 @@ export class ApplicationService {
     }
   ];
 
-  private currentJobId: number | null = null;
+  // Signaux pour l'état de l'application
+  readonly questions = signal<ApplicationQuestion[]>(this.questionsData);
+  readonly currentJobId = signal<number | null>(null);
+  readonly submissions = signal<ApplicationSubmission[]>([]);
 
   setCurrentJobId(jobId: number) {
-    this.currentJobId = jobId;
+    this.currentJobId.set(jobId);
   }
 
   getCurrentJobId(): number | null {
-    return this.currentJobId;
+    return this.currentJobId();
   }
 
   getQuestions(): ApplicationQuestion[] {
-    return this.questions;
+    return this.questions();
   }
 
   submitApplication(answers: { [key: number]: string }): void {
-    // Pour le moment, on affiche juste les réponses dans la console
-    console.log('Candidature soumise:', {
-      jobId: this.currentJobId,
+    const submission: ApplicationSubmission = {
+      jobId: this.currentJobId(),
       answers
-    });
+    };
+    
+    // Ajouter la nouvelle soumission à la liste des soumissions
+    this.submissions.update(current => [...current, submission]);
+    
+    // Pour le moment, on affiche juste les réponses dans la console
+    console.log('Candidature soumise:', submission);
   }
 } 
