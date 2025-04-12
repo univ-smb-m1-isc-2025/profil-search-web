@@ -1,5 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { Observable } from 'rxjs';
 
 export interface Job {
   id: number;
