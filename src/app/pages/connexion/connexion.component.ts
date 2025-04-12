@@ -14,6 +14,8 @@ import { environment } from '../../../environments/environment';
 })
 export class ConnexionComponent implements OnInit {
   invitationCode: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
   private isBrowser: boolean;
   
   constructor(
@@ -74,11 +76,31 @@ export class ConnexionComponent implements OnInit {
   }
 
   verifyInvitationCode(): void {
-    if (this.invitationCode.trim()) {
-      const success = this.authService.loginWithInvitation(this.invitationCode);
-      if (success) {
-        this.router.navigate(['/']);
-      }
+    if (!this.invitationCode.trim()) {
+      this.errorMessage = "Veuillez saisir un code d'invitation valide";
+      return;
     }
+    
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.authService.loginWithInvitationToken(this.invitationCode).subscribe({
+      next: (isValid) => {
+        this.isLoading = false;
+        
+        if (isValid) {
+          this.ngZone.run(() => {
+            this.router.navigate(['/']);
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.errorMessage = "Code d'invitation invalide ou expiré";
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = "Erreur lors de la vérification du code d'invitation";
+      }
+    });
   }
 }

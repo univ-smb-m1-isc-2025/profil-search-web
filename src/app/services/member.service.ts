@@ -31,4 +31,11 @@ export class MemberService {
       { observe: 'response', responseType: 'text' as 'json' }
     );
   }
+
+  generateInvitationToken(entrepriseId: number): Observable<string> {
+    return this.http.get<string>(
+      `${environment.BASE_API_URL}/api/invites/create/${entrepriseId}`,
+      { responseType: 'text' as 'json' }
+    );
+  }
 } 

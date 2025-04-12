@@ -1,7 +1,10 @@
 import { Injectable, PLATFORM_ID, Inject, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -22,7 +25,8 @@ export class AuthService {
   constructor(
     private router: Router,
     @Inject(PLATFORM_ID) platformId: Object,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private http: HttpClient
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     
@@ -62,21 +66,27 @@ export class AuthService {
     }
   }
 
-  loginWithInvitation(invitationCode: string): boolean {
-    // Simuler une vérification du code d'invitation
-    // Dans un environnement réel, ceci serait validé côté serveur
-    if (invitationCode.trim()) {
-      const user: User = {
-        id: 'inv_' + Math.random().toString(36).substr(2, 9),
-        email: 'invite@example.com',
-        name: 'Utilisateur Invité',
-        authProvider: 'invitation'
-      };
-
-      this.setCurrentUser(user);
-      return true;
-    }
-    return false;
+  loginWithInvitationToken(token: string): Observable<boolean> {
+    // Appeler l'API pour vérifier le token d'invitation
+    const apiUrl = `${environment.BASE_API_URL}/api/invites/verify/${token}`;
+    
+    return this.http.get<boolean>(apiUrl).pipe(
+      tap(isValid => {
+        if (isValid) {
+          const user: User = {
+            id: 'inv_' + Math.random().toString(36).substring(2, 9),
+            email: 'invite@example.com',
+            name: 'Utilisateur Invité',
+            authProvider: 'invitation'
+          };
+          this.setCurrentUser(user);
+        }
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la vérification du token:', error);
+        return of(false);
+      })
+    );
   }
 
   logout(): void {
