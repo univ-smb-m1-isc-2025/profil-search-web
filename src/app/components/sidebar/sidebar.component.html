@@ -19,6 +19,11 @@
           <span class="ml-2">Gestion des membres</span>
         </a>
       </li>
+      <li *ngIf="currentUser">
+        <a routerLink="/liste-candidatures" class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
+          <span class="ml-2">Liste des candidatures</span>
+        </a>
+      </li>
       <li *ngIf="!currentUser">
         <a routerLink="/connexion" class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
           <span class="ml-2">Connexion</span>

@@ -33,5 +33,19 @@ export const routes: Routes = [
       import('./pages/connexion/connexion.component')
         .then(m => m.ConnexionComponent),
     data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'liste-candidatures',
+    loadComponent: () => 
+      import('./pages/candidature-list/candidature-list.component')
+        .then(m => m.CandidatureListComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'candidature/:id',
+    loadComponent: () => 
+      import('./pages/candidature-detail/candidature-detail.component')
+        .then(m => m.CandidatureDetailComponent),
+    data: { prefetchStrategy: 'viewport' }
   }
 ];
