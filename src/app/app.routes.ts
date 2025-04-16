@@ -1,15 +1,51 @@
-
 import { Routes } from '@angular/router';
+import { HomeComponent } from './pages/home/home.component';
 
-import { JobListComponent } from './job-list/job-list.component';
-import { JobDetailComponent } from './job-detail/job-detail.component';
-import { JobApplicationComponent } from './job-application/job-application.component';
-import { DeleteDataComponent } from './delete-data/delete-data.component';
-
-// Définition des routes
 export const routes: Routes = [
-  { path: '', component: JobListComponent },
-  { path: 'job/:id', component: JobDetailComponent },
-  { path: 'apply/:id', component: JobApplicationComponent },
-  { path: 'delete-data', component: DeleteDataComponent },
+  {
+    path: '',
+    component: HomeComponent
+  },
+  {
+    path: 'liste-entreprises',
+    loadComponent: () => 
+      import('./pages/entreprise-list/entreprise-list.component')
+        .then(m => m.EntrepriseListComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'gestion-membres',
+    loadComponent: () => 
+      import('./pages/member-list/member-list.component')
+        .then(m => m.MemberListComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'postuler/:id',
+    loadComponent: () => 
+      import('./pages/job-application/job-application.component')
+        .then(m => m.JobApplicationComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'connexion',
+    loadComponent: () => 
+      import('./pages/connexion/connexion.component')
+        .then(m => m.ConnexionComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'liste-candidatures',
+    loadComponent: () => 
+      import('./pages/candidature-list/candidature-list.component')
+        .then(m => m.CandidatureListComponent),
+    data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'candidature/:id',
+    loadComponent: () => 
+      import('./pages/candidature-detail/candidature-detail.component')
+        .then(m => m.CandidatureDetailComponent),
+    data: { prefetchStrategy: 'viewport' }
+  }
 ];

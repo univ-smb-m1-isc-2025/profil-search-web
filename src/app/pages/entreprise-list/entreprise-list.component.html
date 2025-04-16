@@ -1,0 +1,35 @@
+<div class="flex min-h-screen bg-gray-50">
+  <app-sidebar />
+  
+  <div class="flex-1 ml-64">
+    <main class="container mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-6">Liste des entreprises</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let entreprise of entreprises" 
+             class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+          <div class="flex items-center mb-4">
+            <img *ngIf="entreprise.logo" [src]="entreprise.logo" [alt]="entreprise.name" 
+                 class="w-12 h-12 object-contain rounded-full bg-gray-50 mr-4">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-800">{{ entreprise.name }}</h2>
+              <p *ngIf="entreprise.industry" class="text-gray-600">{{ entreprise.industry }}</p>
+            </div>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+              {{ entreprise.jobCount || 0 }} postes disponibles
+            </div>
+            <button 
+              [routerLink]="['/entreprise', entreprise.id]"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Voir les détails
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div> 

@@ -1,0 +1,91 @@
+<div class="flex min-h-screen bg-gray-50">
+  <app-sidebar />
+  
+  <div class="flex-1 ml-64">
+    <main class="container mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-6">La liste des membres</h1>
+      
+      <!-- Indicateur de chargement -->
+      <div *ngIf="isLoading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <p>{{ error }}</p>
+        <button (click)="loadMembers()" class="mt-2 text-sm font-medium underline">Réessayer</button>
+      </div>
+      
+      <!-- Message de succès -->
+      <div *ngIf="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+        <p>{{ successMessage }}</p>
+      </div>
+      
+      <!-- Tableau des membres -->
+      <div *ngIf="!isLoading && !error && members.length > 0" class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-md">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="px-6 py-3 text-left font-semibold">Nom</th>
+              <th class="px-6 py-3 text-left font-semibold">Email</th>
+              <th class="px-6 py-3 text-left font-semibold">Entreprise</th>
+              <th class="px-6 py-3 text-left font-semibold">Statut</th>
+              <th class="px-6 py-3 text-left font-semibold">Actions</th>
+              <th class="px-6 py-3 text-left font-semibold">Inviter</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let member of members" class="hover:bg-gray-50">
+              <td class="px-6 py-4">{{ member.prenom }} {{ member.nom }}</td>
+              <td class="px-6 py-4">{{ member.email }}</td>
+              <td class="px-6 py-4">{{ member.entrepriseName || '-' }}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs rounded-full" 
+                      [ngClass]="{
+                        'bg-green-100 text-green-800': member.actif,
+                        'bg-red-100 text-red-800': !member.actif
+                      }">
+                  {{ member.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <button 
+                  *ngIf="member.actif"
+                  (click)="deactivateMember(member)" 
+                  class="px-3 py-1 rounded text-sm bg-red-100 text-red-800 hover:bg-red-200">
+                  Désactiver
+                </button>
+                <span *ngIf="!member.actif" class="text-gray-400 text-sm">
+                  Désactivé
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <button 
+                  *ngIf="member.actif && invitingMemberId !== member.id"
+                  (click)="inviteMember(member)" 
+                  class="px-3 py-1 rounded text-sm bg-blue-100 text-blue-800 hover:bg-blue-200">
+                  Inviter
+                </button>
+                <div *ngIf="invitingMemberId === member.id" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span class="text-blue-800 text-sm">Envoi...</span>
+                </div>
+                <span *ngIf="!member.actif" class="text-gray-400 text-sm">
+                  -
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Message si aucun membre -->
+      <div *ngIf="!isLoading && !error && members.length === 0" class="text-center py-8">
+        <p class="text-gray-500">Aucun membre trouvé</p>
+      </div>
+    </main>
+  </div>
+</div> 
