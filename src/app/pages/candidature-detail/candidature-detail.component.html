@@ -117,7 +117,7 @@
             <h3 class="text-lg font-medium mb-2">Actions</h3>
             <div class="flex flex-wrap gap-3">
               <button 
-                (click)="setPositif(true); setClosed(true)" 
+                (click)="setPositif(true)" 
                 [disabled]="isLoading"
                 class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
               >
@@ -132,7 +132,7 @@
               </button>
               
               <button 
-                (click)="setClosed(true)" 
+                (click)="setPositif(false)" 
                 [disabled]="isLoading"
                 class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400 disabled:cursor-not-allowed"
               >

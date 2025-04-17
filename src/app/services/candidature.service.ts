@@ -118,13 +118,7 @@ export class CandidatureService {
 
   // Marquer une candidature comme positive/négative
   updatePositif(candidatureId: number, positif: boolean): Observable<any> {
-    // Mettre à jour positif et closed en même temps
-    return this.http.post(`${this.apiUrl}/api/candidatures/updatePositif/${candidatureId}/${positif}`, {}).pipe(
-      tap(() => {
-        // Fermer automatiquement la candidature
-        this.updateClosed(candidatureId, true).subscribe();
-      })
-    );
+    return this.http.post(`${this.apiUrl}/api/candidatures/updatePositif/${candidatureId}/${positif}`, {});
   }
 
   // Marquer une candidature comme fermée

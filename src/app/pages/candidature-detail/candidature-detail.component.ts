@@ -176,39 +176,30 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
     this.error = null;
     this.successMessage = null;
     
-    // Mettre à jour positif et fermer la candidature en même temps
     this.candidatureService.updatePositif(this.candidatureId, positif).subscribe({
       next: () => {
         if (this.candidature) {
           this.candidature.positif = positif;
-          // Fermer automatiquement la candidature
-          this.setClosed(true);
+          // Mettre à jour le statut closed après avoir mis à jour positif
+          this.candidatureService.updateClosed(this.candidatureId, true).subscribe({
+            next: () => {
+              if (this.candidature) {
+                this.candidature.closed = true;
+              }
+              this.successMessage = positif ? 'Candidature acceptée avec succès' : 'Candidature refusée avec succès';
+              
+              // Rediriger vers la liste après un délai
+              setTimeout(() => {
+                this.router.navigate(['/liste-candidatures']);
+              }, 1500);
+            },
+            error: (err) => {
+              console.error('Erreur lors de la mise à jour du statut closed', err);
+              this.error = 'Impossible de finaliser la mise à jour du statut';
+              this.isLoading = false;
+            }
+          });
         }
-      },
-      error: (err) => {
-        console.error('Erreur lors de la mise à jour du statut', err);
-        this.error = 'Impossible de mettre à jour le statut';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  setClosed(closed: boolean): void {
-    this.isLoading = true;
-    this.error = null;
-    this.successMessage = null;
-    
-    this.candidatureService.updateClosed(this.candidatureId, closed).subscribe({
-      next: () => {
-        if (this.candidature) {
-          this.candidature.closed = closed;
-        }
-        this.successMessage = 'Candidature fermée avec succès';
-        
-        // Rediriger vers la liste après un délai
-        setTimeout(() => {
-          this.router.navigate(['/liste-candidatures']);
-        }, 1500);
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du statut', err);
