@@ -176,13 +176,14 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
     this.error = null;
     this.successMessage = null;
     
+    // Mettre à jour positif et fermer la candidature en même temps
     this.candidatureService.updatePositif(this.candidatureId, positif).subscribe({
       next: () => {
         if (this.candidature) {
           this.candidature.positif = positif;
+          // Fermer automatiquement la candidature
+          this.setClosed(true);
         }
-        this.successMessage = 'Statut mis à jour avec succès';
-        this.refreshCandidature();
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du statut', err);
@@ -202,16 +203,12 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
         if (this.candidature) {
           this.candidature.closed = closed;
         }
-        this.successMessage = closed ? 'Candidature fermée avec succès' : 'Candidature rouverte avec succès';
+        this.successMessage = 'Candidature fermée avec succès';
         
-        // Si on ferme une candidature, rediriger vers la liste après un délai
-        if (closed) {
-          setTimeout(() => {
-            this.router.navigate(['/liste-candidatures']);
-          }, 1500);
-        } else {
-          this.refreshCandidature();
-        }
+        // Rediriger vers la liste après un délai
+        setTimeout(() => {
+          this.router.navigate(['/liste-candidatures']);
+        }, 1500);
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du statut', err);

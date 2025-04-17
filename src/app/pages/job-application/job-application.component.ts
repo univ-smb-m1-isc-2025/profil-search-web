@@ -68,7 +68,10 @@ export class JobApplicationComponent implements OnInit {
   }
 
   private initForm(): void {
-    const formConfig: Record<string, any> = {};
+    const formConfig: Record<string, any> = {
+      email: ['', [Validators.required, Validators.email]],
+      name: ['', Validators.required]
+    };
     
     for (const question of this.questions()) {
       formConfig[`question_${question.id}`] = ['', question.required ? Validators.required : []];
@@ -80,11 +83,9 @@ export class JobApplicationComponent implements OnInit {
   onSubmit(): void {
     if (!this.applicationForm || this.applicationForm.invalid) {
       // Marquer tous les champs comme touchés pour afficher les erreurs
-      if (this.applicationForm) {
-        Object.keys(this.applicationForm.controls).forEach(key => {
-          this.applicationForm.get(key)?.markAsTouched();
-        });
-      }
+      Object.keys(this.applicationForm.controls).forEach(key => {
+        this.applicationForm.get(key)?.markAsTouched();
+      });
       return;
     }
     
@@ -102,11 +103,9 @@ export class JobApplicationComponent implements OnInit {
       }
     }
     
-    // Utiliser le nom du candidat à partir du formulaire si disponible, sinon utiliser un défaut
-    let candidatName = 'Candidat';
-    let candidatEmail = 'candidat@exemple.com';
-    
-    // TODO: récupérer les infos du candidat à partir du profil utilisateur
+    // Utiliser les informations du candidat depuis le formulaire
+    const candidatName = formValues.name;
+    const candidatEmail = formValues.email;
     
     // Soumettre la candidature
     this.applicationService.submitApplication(answers, candidatName, candidatEmail).subscribe({
