@@ -103,12 +103,17 @@ export class CandidatureService {
 
   // Créer un nouveau tag
   createTag(tagName: string): Observable<Tag> {
-    return this.http.post<Tag>(`${this.apiUrl}/api/tags/create`, { tag: tagName });
+    return this.http.post<Tag>(`${this.apiUrl}/api/tags/create`, {
+      name: tagName
+    });
   }
 
   // Ajouter un tag à une candidature
-  addTagToCandidature(candidatureId: number, tagId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/api/tag-candidatures/add/${tagId}/${candidatureId}`);
+  addTagToCandidature(tagId: number, candidatureId: number): Observable<string> {
+    return this.http.get(
+      `${this.apiUrl}/api/tag-candidatures/add/${tagId}/${candidatureId}`,
+      { responseType: 'text' }
+    );
   }
 
   // Marquer une candidature comme positive/négative

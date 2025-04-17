@@ -64,24 +64,20 @@
           <!-- Tags -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <div class="flex flex-wrap gap-2 mb-2">
-              <button 
-                *ngFor="let tag of availableTags" 
-                (click)="toggleTag(tag)"
-                class="px-3 py-1 rounded-full text-xs font-medium"
-                [ngClass]="isTagSelected(tag.id) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-              >
+            <!-- Liste des tags existants -->
+            <div class="mb-3">
+              <div *ngFor="let tag of selectedTags" class="text-gray-600 py-1">
                 {{ tag.tag }}
-              </button>
+              </div>
             </div>
             
             <!-- Ajouter un nouveau tag -->
-            <div class="flex mt-2">
+            <div class="flex">
               <input 
                 type="text" 
                 [(ngModel)]="newTagInput" 
                 placeholder="Nouveau tag"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
               />
               <button 
                 (click)="addNewTag()"

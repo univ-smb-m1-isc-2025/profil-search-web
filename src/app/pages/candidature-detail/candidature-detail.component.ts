@@ -111,49 +111,33 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
   }
 
   toggleTag(tag: Tag): void {
+    if (this.isLoading || this.isTagSelected(tag.id)) return;
+    
     this.isLoading = true;
     this.error = null;
+    this.successMessage = null;
     
-    if (this.isTagSelected(tag.id)) {
-      // Retirer le tag de la liste locale
-      this.selectedTags = this.selectedTags.filter(t => t.id !== tag.id);
-      
-      // Pour l'instant, l'API ne gère pas la suppression des tags
-      // À implémenter côté backend
-      this.isLoading = false;
-    } else {
-      // Ajouter le tag à la liste locale d'abord
-      this.selectedTags.push(tag);
-      
-      // Puis envoyer au serveur
-      this.candidatureService.addTagToCandidature(this.candidatureId, tag.id).subscribe({
-        next: () => {
-          console.log('Tag ajouté avec succès:', tag.tag);
-          this.isLoading = false;
-          this.successMessage = `Tag "${tag.tag}" ajouté avec succès`;
-          // Effacer le message après 2 secondes
-          setTimeout(() => {
-            if (this.successMessage && this.successMessage.includes(tag.tag)) {
-              this.successMessage = null;
-            }
-          }, 2000);
-        },
-        error: (err) => {
-          console.error('Erreur lors de l\'ajout du tag', err);
-          // Retirer le tag de la liste locale en cas d'erreur
-          this.selectedTags = this.selectedTags.filter(t => t.id !== tag.id);
-          this.error = `Impossible d'ajouter le tag "${tag.tag}"`;
-          this.isLoading = false;
-        }
-      });
-    }
+    this.candidatureService.addTagToCandidature(tag.id, this.candidatureId).subscribe({
+      next: (response) => {
+        this.selectedTags.push(tag);
+        console.log('Tag ajouté avec succès:', response);
+        this.successMessage = `Tag "${tag.tag}" ajouté avec succès`;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout du tag:', err);
+        this.error = `Impossible d'ajouter le tag "${tag.tag}"`;
+        this.isLoading = false;
+      }
+    });
   }
 
   addNewTag(): void {
-    if (this.newTagInput.trim() === '') return;
+    if (this.isLoading || !this.newTagInput.trim()) return;
     
     this.isLoading = true;
     this.error = null;
+    this.successMessage = null;
     
     const newTagName = this.newTagInput.trim();
     
@@ -163,29 +147,23 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
         this.availableTags.push(newTag);
         this.newTagInput = '';
         
-        // Ajouter le tag à la candidature
-        this.candidatureService.addTagToCandidature(this.candidatureId, newTag.id).subscribe({
-          next: () => {
+        // Ajouter automatiquement le nouveau tag à la candidature
+        this.candidatureService.addTagToCandidature(newTag.id, this.candidatureId).subscribe({
+          next: (response) => {
             this.selectedTags.push(newTag);
-            this.isLoading = false;
+            console.log('Nouveau tag ajouté à la candidature:', response);
             this.successMessage = `Tag "${newTag.tag}" créé et ajouté avec succès`;
-            
-            // Effacer le message après 2 secondes
-            setTimeout(() => {
-              if (this.successMessage && this.successMessage.includes(newTag.tag)) {
-                this.successMessage = null;
-              }
-            }, 2000);
+            this.isLoading = false;
           },
           error: (err) => {
-            console.error('Erreur lors de l\'ajout du nouveau tag à la candidature', err);
+            console.error('Erreur lors de l\'ajout du nouveau tag:', err);
             this.error = `Tag créé mais impossible de l'ajouter à la candidature`;
             this.isLoading = false;
           }
         });
       },
       error: (err) => {
-        console.error('Erreur lors de la création du tag', err);
+        console.error('Erreur lors de la création du tag:', err);
         this.error = `Impossible de créer le tag "${newTagName}"`;
         this.isLoading = false;
       }
