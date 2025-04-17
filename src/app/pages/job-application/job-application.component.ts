@@ -6,6 +6,7 @@ import { ApplicationService } from '../../services/application.service';
 import { JobService, Job } from '../../services/job.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { AuthService } from '../../services/auth.service';
+import { EmailService } from '../../services/email/email.service';
 
 @Component({
   selector: 'app-job-application',
@@ -28,7 +29,8 @@ export class JobApplicationComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private emailService: EmailService
   ) {}
 
   ngOnInit(): void {
@@ -111,12 +113,30 @@ export class JobApplicationComponent implements OnInit {
     this.applicationService.submitApplication(answers, candidatName, candidatEmail).subscribe({
       next: (response) => {
         if (response.success) {
-          this.isSubmitted = true;
-          this.isSubmitting = false;
-          // Rediriger vers la page d'accueil après un délai
-          setTimeout(() => {
-            this.router.navigate(['/']);
-          }, 3000);
+          // Envoyer l'email avec le lien de suppression
+          this.emailService.sendDeletionEmail(
+            candidatEmail,
+            candidatName,
+            response.candidatureId
+          ).subscribe({
+            next: () => {
+              this.isSubmitted = true;
+              this.isSubmitting = false;
+              // Rediriger vers la page d'accueil après un délai
+              setTimeout(() => {
+                this.router.navigate(['/']);
+              }, 3000);
+            },
+            error: (emailError) => {
+              console.error('Erreur lors de l\'envoi de l\'email', emailError);
+              // On continue même si l'email n'a pas été envoyé
+              this.isSubmitted = true;
+              this.isSubmitting = false;
+              setTimeout(() => {
+                this.router.navigate(['/']);
+              }, 3000);
+            }
+          });
         } else {
           this.error = response.error || 'Une erreur est survenue lors de la soumission';
           this.isSubmitting = false;

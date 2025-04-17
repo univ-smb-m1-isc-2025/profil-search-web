@@ -126,6 +126,11 @@ export class CandidatureService {
     return this.http.post(`${this.apiUrl}/api/candidatures/updateClosed/${candidatureId}/${closed}`, {});
   }
 
+  // Supprimer une candidature
+  deleteCandidature(candidatureId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/candidatures/delete/${candidatureId}`);
+  }
+
   // Récupérer tous les membres
   getMembers(): Observable<Member[]> {
     return this.http.get<Member[]>(`${this.apiUrl}/api/members/all`);
