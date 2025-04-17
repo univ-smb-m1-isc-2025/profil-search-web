@@ -32,51 +32,44 @@ export class JobApplicationComponent implements OnInit {
       return;
     }
 
+    // Charger les questions pour l'offre
     this.applicationService.setCurrentJobId(jobId);
-    this.initForm();
     
-    const allJobs = this.jobService.getJobs();
-    this.job = allJobs.find(j => j.id === jobId) || null;
-    if (!this.job) {
-      this.router.navigate(['/']);
+    // Initialiser le formulaire après un court délai pour attendre les questions
+    setTimeout(() => this.initForm(), 100);
+    
+    // Récupérer l'offre d'emploi
+    this.loadJob(jobId);
+  }
+
+  private loadJob(jobId: number): void {
+    const jobs = this.jobService.getJobs();
+    
+    if (jobs.length > 0) {
+      this.job = jobs.find(j => j.id === jobId) || null;
+    } else {
+      this.jobService.fetchJobs();
+      setTimeout(() => {
+        const updatedJobs = this.jobService.getJobs();
+        this.job = updatedJobs.find(j => j.id === jobId) || null;
+      }, 300);
     }
   }
 
   private initForm(): void {
-    // Créer un groupe de formulaires dynamique basé sur les questions
     const formConfig: Record<string, any> = {};
     
     for (const question of this.questions()) {
-      formConfig[`question_${question.id}`] = [
-        '', // valeur par défaut
-        question.required ? Validators.required : []
-      ];
+      formConfig[`question_${question.id}`] = ['', question.required ? Validators.required : []];
     }
     
     this.applicationForm = this.fb.group(formConfig);
   }
 
   onSubmit(): void {
-    if (this.applicationForm.invalid) {
-      // Marquer tous les champs comme touchés pour afficher les erreurs
-      Object.keys(this.applicationForm.controls).forEach(key => {
-        this.applicationForm.get(key)?.markAsTouched();
-      });
-      return;
-    }
+    if (!this.applicationForm) return;
     
-    // Transformer les données du formulaire au format attendu par le service
-    const formValues = this.applicationForm.value;
-    const answers: { [key: number]: string } = {};
     
-    for (const key in formValues) {
-      if (key.startsWith('question_')) {
-        const questionId = parseInt(key.replace('question_', ''));
-        answers[questionId] = formValues[key];
-      }
-    }
-    
-    this.applicationService.submitApplication(answers);
     this.router.navigate(['/']);
   }
 } 

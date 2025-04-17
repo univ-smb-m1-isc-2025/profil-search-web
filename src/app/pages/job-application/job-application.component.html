@@ -11,7 +11,7 @@
           <p class="text-gray-600">{{ job.company }}</p>
         </div>
 
-        <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <form *ngIf="applicationForm" [formGroup]="applicationForm" (ngSubmit)="onSubmit()" class="space-y-6">
           <div *ngFor="let question of questions()" class="space-y-2">
             <label [for]="'q' + question.id" class="block text-sm font-medium text-gray-700">
               {{ question.question }}

@@ -1,4 +1,4 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
@@ -12,25 +12,24 @@ import { JobService } from '../../services/job.service';
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
-  // On utilise directement le signal du service
   jobs = this.jobService.jobs;
   searchResults = false;
 
-  constructor(private jobService: JobService) {
-    // Utilisation d'un effect pour surveiller les changements dans les jobs
-    effect(() => {
-      // L'effect sera déclenché automatiquement quand les jobs changent
-      console.log('Jobs mis à jour:', this.jobs());
-    });
-  }
+  constructor(private jobService: JobService) {}
 
   ngOnInit(): void {
-    this.loadAllJobs();
+    this.loadJobs();
   }
 
   loadAllJobs(): void {
     this.jobService.resetSearch();
     this.searchResults = false;
+  }
+
+  private loadJobs(): void {
+    if (this.jobs().length === 0) {
+      this.jobService.fetchJobs();
+    }
   }
 
   onSearch(query: string): void {
