@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../environments/environment';
 export interface Job {
   id: number;
   title: string;
@@ -14,7 +14,7 @@ export interface Job {
 })
 export class JobService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/offres/all';
+  private apiUrl = environment.BASE_API_URL + '/api/offres/all';
   private initialJobs: Job[] = [];
   
   jobs = signal<Job[]>([]);

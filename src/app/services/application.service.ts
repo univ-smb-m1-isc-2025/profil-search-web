@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../environments/environment';
 
 export interface ApplicationQuestion {
   id: number;
@@ -21,7 +21,7 @@ export interface ApplicationSubmission {
 })
 export class ApplicationService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/offres';
+  private apiUrl = environment.BASE_API_URL + '/api/offres';
   
   // Signaux pour l'état de l'application
   readonly questions = signal<ApplicationQuestion[]>([]);
