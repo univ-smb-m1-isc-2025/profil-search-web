@@ -11,6 +11,17 @@
           <p class="text-gray-600">{{ job.company }}</p>
         </div>
 
+        <!-- Message d'erreur -->
+        <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+          <p>{{ error }}</p>
+        </div>
+
+        <!-- Message de succès -->
+        <div *ngIf="isSubmitted" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+          <p>Votre candidature a été soumise avec succès !</p>
+          <p>Vous serez redirigé vers la page d'accueil...</p>
+        </div>
+
         <form *ngIf="applicationForm" [formGroup]="applicationForm" (ngSubmit)="onSubmit()" class="space-y-6">
           <div *ngFor="let question of questions()" class="space-y-2">
             <label [for]="'q' + question.id" class="block text-sm font-medium text-gray-700">
@@ -42,9 +53,17 @@
           <div class="flex justify-end">
             <button
               type="submit"
-              class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              [disabled]="isSubmitting"
+              class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              Terminer la candidature
+              <span *ngIf="!isSubmitting">Terminer la candidature</span>
+              <span *ngIf="isSubmitting" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Envoi en cours...
+              </span>
             </button>
           </div>
         </form>

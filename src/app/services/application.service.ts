@@ -1,6 +1,9 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Observable, forkJoin, of } from 'rxjs';
+import { switchMap, tap, map } from 'rxjs/operators';
+import { CandidatureService } from './candidature.service';
 
 export interface ApplicationQuestion {
   id: number;
@@ -14,14 +17,13 @@ export interface ApplicationSubmission {
   answers: { [key: number]: string };
 }
 
-
-
 @Injectable({
   providedIn: 'root'
 })
 export class ApplicationService {
   private http = inject(HttpClient);
   private apiUrl = environment.BASE_API_URL + '/api/offres';
+  private candidatureService = inject(CandidatureService);
   
   // Signaux pour l'état de l'application
   readonly questions = signal<ApplicationQuestion[]>([]);
@@ -83,4 +85,39 @@ export class ApplicationService {
     this.questions.set(defaultQuestions);
   }
 
+  submitApplication(answers: { [key: number]: string }, candidatName: string = 'Candidat', candidatEmail: string = 'candidat@exemple.com'): Observable<any> {
+    const jobId = this.currentJobId();
+    if (!jobId) return of({ success: false, error: 'Pas d\'offre sélectionnée' });
+
+    // 1. Créer la candidature
+    return this.candidatureService.createCandidature(candidatEmail, candidatName, jobId).pipe(
+      switchMap(candidatureResponse => {
+        const candidatureId = candidatureResponse?.id;
+        if (!candidatureId) {
+          return of({ success: false, error: 'Erreur lors de la création de la candidature' });
+        }
+
+        // 2. Ajouter les réponses aux questions
+        const questionReponseRequests = Object.entries(answers).map(([questionId, reponse]) => {
+          return this.candidatureService.addQuestionReponse(
+            candidatureId,
+            parseInt(questionId),
+            reponse
+          );
+        });
+
+        // Exécuter toutes les requêtes pour ajouter les réponses
+        return forkJoin(questionReponseRequests).pipe(
+          tap(() => {
+            // Enregistrer la soumission localement
+            this.submissions.update(current => [
+              ...current,
+              { jobId, answers }
+            ]);
+          }),
+          map(() => ({ success: true, candidatureId }))
+        );
+      })
+    );
+  }
 } 

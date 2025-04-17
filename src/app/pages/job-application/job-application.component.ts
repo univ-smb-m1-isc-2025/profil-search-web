@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ApplicationService } from '../../services/application.service';
 import { JobService, Job } from '../../services/job.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-job-application',
@@ -16,16 +17,26 @@ export class JobApplicationComponent implements OnInit {
   questions = this.applicationService.questions;
   applicationForm!: FormGroup;
   job: Job | null = null;
+  isSubmitting = false;
+  isSubmitted = false;
+  error: string | null = null;
+  isAuthenticated = false;
 
   constructor(
     private applicationService: ApplicationService,
     private jobService: JobService,
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    // Vérifier si l'utilisateur est connecté
+    this.authService.isLoggedIn().subscribe(isLoggedIn => {
+      this.isAuthenticated = isLoggedIn;
+    });
+
     const jobId = Number(this.route.snapshot.paramMap.get('id'));
     if (!jobId) {
       this.router.navigate(['/']);
@@ -67,9 +78,56 @@ export class JobApplicationComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.applicationForm) return;
+    if (!this.applicationForm || this.applicationForm.invalid) {
+      // Marquer tous les champs comme touchés pour afficher les erreurs
+      if (this.applicationForm) {
+        Object.keys(this.applicationForm.controls).forEach(key => {
+          this.applicationForm.get(key)?.markAsTouched();
+        });
+      }
+      return;
+    }
     
+    this.isSubmitting = true;
+    this.error = null;
     
-    this.router.navigate(['/']);
+    // Transformer les données du formulaire au format attendu par le service
+    const formValues = this.applicationForm.value;
+    const answers: { [key: number]: string } = {};
+    
+    for (const key in formValues) {
+      if (key.startsWith('question_')) {
+        const questionId = parseInt(key.replace('question_', ''));
+        answers[questionId] = formValues[key];
+      }
+    }
+    
+    // Utiliser le nom du candidat à partir du formulaire si disponible, sinon utiliser un défaut
+    let candidatName = 'Candidat';
+    let candidatEmail = 'candidat@exemple.com';
+    
+    // TODO: récupérer les infos du candidat à partir du profil utilisateur
+    
+    // Soumettre la candidature
+    this.applicationService.submitApplication(answers, candidatName, candidatEmail).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.isSubmitted = true;
+          this.isSubmitting = false;
+          // Rediriger vers la page d'accueil après un délai
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 3000);
+        } else {
+          this.error = response.error || 'Une erreur est survenue lors de la soumission';
+          this.isSubmitting = false;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors de la soumission de la candidature', error);
+        this.error = 'Une erreur est survenue lors de la soumission. Veuillez réessayer plus tard.';
+        this.isSubmitting = false;
+      }
+    });
   }
 } 
