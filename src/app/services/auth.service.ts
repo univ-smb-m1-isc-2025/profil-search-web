@@ -29,7 +29,7 @@ export class AuthService {
     private http: HttpClient
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    
+
     // Charger l'utilisateur depuis le localStorage s'il existe et si on est dans un navigateur
     if (this.isBrowser) {
       const savedUser = localStorage.getItem('currentUser');
@@ -54,17 +54,19 @@ export class AuthService {
     // Dans un environnement réel, ceci serait validé côté serveur
     if (this.isBrowser) {
       const payload = this.decodeJwtResponse(googleResponse.credential);
-      
-      const user: User = {
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-        authProvider: 'google'
-      };
+      const apiUrl = `${environment.BASE_API_URL}/api/members/email/${payload.email}`;
+      this.http.get<User>(apiUrl).subscribe(
+        (user: User) => {
+          if (user) {
+            this.setCurrentUser(user);
+            console.log(user);
+          } else {
+            // Si l'utilisateur n'existe pas, on peut le créer ou gérer l'erreur
+            console.error('Utilisateur non trouvé dans la base de données.');
+          }
+        }
+      )
 
-      this.setCurrentUser(user);
-      
       // Utiliser NgZone pour s'assurer que la navigation se fait dans le contexte Angular
       this.ngZone.run(() => {
         this.router.navigate(['/']);
@@ -75,7 +77,7 @@ export class AuthService {
   loginWithInvitationToken(token: string): Observable<boolean> {
     // Appeler l'API pour vérifier le token d'invitation
     const apiUrl = `${environment.BASE_API_URL}/api/invites/verify/${token}`;
-    
+
     return this.http.get<boolean>(apiUrl).pipe(
       tap(isValid => {
         if (isValid) {
@@ -114,7 +116,7 @@ export class AuthService {
     if (!this.isBrowser) {
       return {}; // Retourner un objet vide si pas dans le navigateur
     }
-    
+
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
