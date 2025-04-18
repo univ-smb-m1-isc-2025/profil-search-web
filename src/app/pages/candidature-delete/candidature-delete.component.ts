@@ -15,10 +15,9 @@ export class CandidatureDeleteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      const candidatureId = parseInt(idParam, 10);
-      this.candidatureService.deleteCandidature(candidatureId).subscribe({
+    const tokenParam = this.route.snapshot.paramMap.get('token');
+    if (tokenParam) {
+      this.candidatureService.deleteCandidature(tokenParam).subscribe({
         next: () => {
           // Redirection immédiate vers la page d'accueil
           this.router.navigate(['/']);
@@ -29,7 +28,7 @@ export class CandidatureDeleteComponent implements OnInit {
         }
       });
     } else {
-      // Si pas d'ID, redirection vers l'accueil
+      // Si pas de token, redirection vers l'accueil
       this.router.navigate(['/']);
     }
   }

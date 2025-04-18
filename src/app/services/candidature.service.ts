@@ -44,6 +44,7 @@ export interface Candidature {
   questionReponses?: QuestionReponse[];
   commentaire?: string;
   prochaineAction?: string;
+  deleteToken?: string;
 }
 
 export interface Member {
@@ -62,8 +63,8 @@ export class CandidatureService {
   constructor(private http: HttpClient) { }
 
   // Créer une nouvelle candidature
-  createCandidature(emailCandidat: string, name: string, offreId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/candidatures/create`, {
+  createCandidature(emailCandidat: string, name: string, offreId: number): Observable<Candidature> {
+    return this.http.post<Candidature>(`${this.apiUrl}/api/candidatures/create`, {
       emailCandidat,
       name,
       offreId
@@ -127,8 +128,8 @@ export class CandidatureService {
   }
 
   // Supprimer une candidature
-  deleteCandidature(candidatureId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/api/candidatures/delete/${candidatureId}`);
+  deleteCandidature(deleteToken: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/candidatures/delete/${deleteToken}`);
   }
 
   // Récupérer tous les membres

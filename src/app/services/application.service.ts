@@ -89,16 +89,30 @@ export class ApplicationService {
     const jobId = this.currentJobId();
     if (!jobId) return of({ success: false, error: 'Pas d\'offre sélectionnée' });
 
+    console.log('Début de la soumission de candidature:', {
+      jobId,
+      candidatName,
+      candidatEmail,
+      answers
+    });
+
     // 1. Créer la candidature
     return this.candidatureService.createCandidature(candidatEmail, candidatName, jobId).pipe(
+      tap(candidatureResponse => {
+        console.log('Candidature créée avec succès:', candidatureResponse);
+      }),
       switchMap(candidatureResponse => {
         const candidatureId = candidatureResponse?.id;
+        const deleteToken = candidatureResponse?.deleteToken;
+        
         if (!candidatureId) {
+          console.error('Erreur: Pas d\'ID de candidature reçu');
           return of({ success: false, error: 'Erreur lors de la création de la candidature' });
         }
 
         // 2. Ajouter les réponses aux questions
         const questionReponseRequests = Object.entries(answers).map(([questionId, reponse]) => {
+          console.log(`Ajout de la réponse pour la question ${questionId}:`, reponse);
           return this.candidatureService.addQuestionReponse(
             candidatureId,
             parseInt(questionId),
@@ -109,13 +123,14 @@ export class ApplicationService {
         // Exécuter toutes les requêtes pour ajouter les réponses
         return forkJoin(questionReponseRequests).pipe(
           tap(() => {
+            console.log('Toutes les réponses ont été enregistrées avec succès');
             // Enregistrer la soumission localement
             this.submissions.update(current => [
               ...current,
               { jobId, answers }
             ]);
           }),
-          map(() => ({ success: true, candidatureId }))
+          map(() => ({ success: true, candidatureId, deleteToken }))
         );
       })
     );

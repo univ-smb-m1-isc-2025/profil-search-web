@@ -54,9 +54,9 @@ export class EmailService {
   sendDeletionEmail(
     email: string,
     name: string,
-    candidatureId: number
+    deleteToken: string
   ): Observable<boolean> {
-    const deletionUrl = `${window.location.origin}/candidature/delete/${candidatureId}`;
+    const deletionUrl = `${window.location.origin}/candidature/delete/${deleteToken}`;
     
     const templateParams: EmailParams = {
       to_email: email,
