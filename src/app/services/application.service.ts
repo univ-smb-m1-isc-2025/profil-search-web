@@ -1,4 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { Observable, forkJoin, of } from 'rxjs';
+import { switchMap, tap, map } from 'rxjs/operators';
+import { CandidatureService } from './candidature.service';
 
 export interface ApplicationQuestion {
   id: number;
@@ -16,54 +21,103 @@ export interface ApplicationSubmission {
   providedIn: 'root'
 })
 export class ApplicationService {
-  private questionsData: ApplicationQuestion[] = [
-    {
-      id: 1,
-      question: "Combien d'année d'expérience disposez-vous ?",
-      type: 'text',
-      required: true
-    },
-    {
-      id: 2,
-      question: "Donnez 2-3 créneaux de disponibilité",
-      type: 'textarea',
-      required: true
-    },
-    {
-      id: 3,
-      question: "Comment avez-vous entendu parler de l'entreprise ?",
-      type: 'textarea',
-      required: true
-    }
-  ];
-
+  private http = inject(HttpClient);
+  private apiUrl = environment.BASE_API_URL + '/api/offres';
+  private candidatureService = inject(CandidatureService);
+  
   // Signaux pour l'état de l'application
-  readonly questions = signal<ApplicationQuestion[]>(this.questionsData);
+  readonly questions = signal<ApplicationQuestion[]>([]);
   readonly currentJobId = signal<number | null>(null);
   readonly submissions = signal<ApplicationSubmission[]>([]);
 
+  constructor() {}
+
   setCurrentJobId(jobId: number) {
     this.currentJobId.set(jobId);
+    this.loadQuestionsForJob(jobId);
   }
 
-  getCurrentJobId(): number | null {
-    return this.currentJobId();
-  }
-
-  getQuestions(): ApplicationQuestion[] {
-    return this.questions();
-  }
-
-  submitApplication(answers: { [key: number]: string }): void {
-    const submission: ApplicationSubmission = {
-      jobId: this.currentJobId(),
-      answers
-    };
+  private loadQuestionsForJob(jobId: number): void {
+    const url = `${this.apiUrl}/${jobId}`;
     
-    // Ajouter la nouvelle soumission à la liste des soumissions
-    this.submissions.update(current => [...current, submission]);
+    this.http.get<any>(url).subscribe({
+      next: (response) => {
+        if (response && response.questions) {
+          const questionsFromApi = response.questions.map((q: any) => ({
+            id: q.id || 0,
+            question: q.question_text || '',
+            type: q.question_text?.length > 50 ? 'textarea' : 'text',
+            required: true
+          }));
+          this.questions.set(questionsFromApi);
+        } else {
+          this.setDefaultQuestions();
+        }
+      },
+      error: () => {
+        this.setDefaultQuestions();
+      }
+    });
+  }
+
+  private setDefaultQuestions(): void {
+    const defaultQuestions = [
+      {
+        id: 1,
+        question: "Combien d'année d'expérience disposez-vous ?",
+        type: 'text',
+        required: true
+      },
+      {
+        id: 2,
+        question: "Donnez 2-3 créneaux de disponibilité",
+        type: 'textarea',
+        required: true
+      },
+      {
+        id: 3,
+        question: "Comment avez-vous entendu parler de l'entreprise ?",
+        type: 'textarea',
+        required: true
+      }
+    ] as ApplicationQuestion[];
     
-    // Pour le moment, on affiche juste les réponses dans la console
-    console.log('Candidature soumise:', submission);
+    this.questions.set(defaultQuestions);
+  }
+
+  submitApplication(answers: { [key: number]: string }, candidatName: string = 'Candidat', candidatEmail: string = 'candidat@exemple.com'): Observable<any> {
+    const jobId = this.currentJobId();
+    if (!jobId) return of({ success: false, error: 'Pas d\'offre sélectionnée' });
+
+    // 1. Créer la candidature
+    return this.candidatureService.createCandidature(candidatEmail, candidatName, jobId).pipe(
+      switchMap(candidatureResponse => {
+        const candidatureId = candidatureResponse?.id;
+        if (!candidatureId) {
+          return of({ success: false, error: 'Erreur lors de la création de la candidature' });
+        }
+
+        // 2. Ajouter les réponses aux questions
+        const questionReponseRequests = Object.entries(answers).map(([questionId, reponse]) => {
+          return this.candidatureService.addQuestionReponse(
+            candidatureId,
+            parseInt(questionId),
+            reponse
+          );
+        });
+
+        // Exécuter toutes les requêtes pour ajouter les réponses
+        return forkJoin(questionReponseRequests).pipe(
+          tap(() => {
+            // Enregistrer la soumission localement
+            this.submissions.update(current => [
+              ...current,
+              { jobId, answers }
+            ]);
+          }),
+          map(() => ({ success: true, candidatureId }))
+        );
+      })
+    );
   }
 } 

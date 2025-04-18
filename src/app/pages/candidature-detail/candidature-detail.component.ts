@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
-import { Candidature, CandidatureService, Tag } from '../../services/candidature.service';
+import { Candidature, CandidatureService, Member, Tag } from '../../services/candidature.service';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-candidature-detail',
@@ -15,56 +16,65 @@ import { Subscription } from 'rxjs';
 export class CandidatureDetailComponent implements OnInit, OnDestroy {
   candidatureId: number = 0;
   candidature: Candidature | undefined;
-  commentaire: string = '';
-  prochaineAction: string = '';
-  reponse: 'Positive' | 'Negative' | '' = '';
   isLoading: boolean = true;
   error: string | null = null;
+  authError: string | null = null;
   successMessage: string | null = null;
   availableTags: Tag[] = [];
   newTagInput: string = '';
   selectedTags: Tag[] = [];
+  members: Member[] = [];
+  selectedMemberId: number | undefined = undefined;
   
   private subscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private candidatureService: CandidatureService
+    private candidatureService: CandidatureService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const idParam = params.get('id');
-      if (idParam) {
-        this.candidatureId = parseInt(idParam, 10);
-        this.loadCandidature();
-        this.loadTags();
-      } else {
-        this.error = 'ID de candidature non spécifié';
+    // Vérifier l'authentification avant de charger les données
+    this.authService.isLoggedIn().subscribe(isLoggedIn => {
+      if (!isLoggedIn) {
+        this.authError = "Vous devez être connecté pour voir les détails d'une candidature";
         this.isLoading = false;
+        // Rediriger vers la page de connexion après un délai
+        setTimeout(() => {
+          this.router.navigate(['/connexion'], { 
+            queryParams: { returnUrl: this.router.url } 
+          });
+        }, 2000);
+        return;
       }
+      
+      // Récupérer l'ID de la candidature et charger les données
+      this.route.paramMap.subscribe(params => {
+        const idParam = params.get('id');
+        if (idParam) {
+          this.candidatureId = parseInt(idParam, 10);
+          this.loadInitialData();
+        } else {
+          this.error = 'ID de candidature non spécifié';
+          this.isLoading = false;
+        }
+      });
     });
   }
 
-  loadCandidature(): void {
+  loadInitialData(): void {
     this.isLoading = true;
     this.error = null;
 
-    const subscription = this.candidatureService.getCandidature(this.candidatureId).subscribe({
+    // Charger les données de base
+    const candidatureSub = this.candidatureService.getCandidature(this.candidatureId).subscribe({
       next: (data) => {
         if (data) {
           this.candidature = data;
-          this.commentaire = data.commentaire || '';
-          this.prochaineAction = data.prochaineAction || '';
-          this.selectedTags = data.tags || [];
-          
-          // Définir la réponse si la candidature est clôturée
-          if (data.estClo) {
-            this.reponse = data.positif ? 'Positive' : 'Negative';
-          } else {
-            this.reponse = '';
-          }
+          this.selectedTags = data.tagList || [];
+          this.selectedMemberId = data.assigneeId;
         } else {
           this.error = 'Candidature non trouvée';
         }
@@ -77,85 +87,169 @@ export class CandidatureDetailComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.subscriptions.push(subscription);
-  }
+    this.subscriptions.push(candidatureSub);
 
-  loadTags(): void {
-    const subscription = this.candidatureService.getTags().subscribe({
+    // Charger les tags et les membres
+    const tagsSub = this.candidatureService.getTags().subscribe({
       next: (tags) => {
         this.availableTags = tags;
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des tags', err);
       }
     });
 
-    this.subscriptions.push(subscription);
+    const membersSub = this.candidatureService.getMembers().subscribe({
+      next: (members) => {
+        this.members = members;
+      }
+    });
+
+    this.subscriptions.push(tagsSub, membersSub);
   }
 
+  // Gestion des tags
   isTagSelected(tagId: number): boolean {
     return this.selectedTags.some(t => t.id === tagId);
   }
 
   toggleTag(tag: Tag): void {
-    if (this.isTagSelected(tag.id)) {
-      this.selectedTags = this.selectedTags.filter(t => t.id !== tag.id);
-      this.candidatureService.removeTagFromCandidature(this.candidatureId, tag.id).subscribe();
-    } else {
-      this.selectedTags.push(tag);
-      this.candidatureService.addTagToCandidature(this.candidatureId, tag.id).subscribe();
-    }
-  }
-
-  addNewTag(): void {
-    if (this.newTagInput.trim() === '') return;
-    
-    // Simuler l'ajout d'un nouveau tag (en production, cela ferait un appel API)
-    const newTag: Tag = {
-      id: this.availableTags.length + 1,
-      tag: this.newTagInput.trim()
-    };
-    
-    this.availableTags.push(newTag);
-    this.selectedTags.push(newTag);
-    this.newTagInput = '';
-    
-    // En production, on ajouterait également le tag à la candidature via l'API
-  }
-
-  terminerRevue(): void {
-    if (!this.candidature) return;
-    
-    // Mise à jour de la candidature
-    const updatedCandidature: Candidature = {
-      ...this.candidature,
-      commentaire: this.commentaire,
-      prochaineAction: this.prochaineAction,
-      tags: this.selectedTags,
-      estClo: this.reponse !== '',
-      positif: this.reponse === 'Positive'
-    };
+    if (this.isLoading || this.isTagSelected(tag.id)) return;
     
     this.isLoading = true;
+    this.error = null;
+    this.successMessage = null;
     
-    const subscription = this.candidatureService.updateCandidature(updatedCandidature).subscribe({
-      next: () => {
-        this.successMessage = 'Candidature mise à jour avec succès';
+    this.candidatureService.addTagToCandidature(tag.id, this.candidatureId).subscribe({
+      next: (response) => {
+        this.selectedTags.push(tag);
+        console.log('Tag ajouté avec succès:', response);
+        this.successMessage = `Tag "${tag.tag}" ajouté avec succès`;
         this.isLoading = false;
-        
-        // Redirection vers la liste après un court délai
-        setTimeout(() => {
-          this.router.navigate(['/liste-candidatures']);
-        }, 1500);
       },
       error: (err) => {
-        console.error('Erreur lors de la mise à jour de la candidature', err);
-        this.error = 'Impossible de mettre à jour la candidature. Veuillez réessayer plus tard.';
+        console.error('Erreur lors de l\'ajout du tag:', err);
+        this.error = `Impossible d'ajouter le tag "${tag.tag}"`;
         this.isLoading = false;
       }
     });
+  }
+
+  addNewTag(): void {
+    if (this.isLoading || !this.newTagInput.trim()) return;
     
-    this.subscriptions.push(subscription);
+    this.isLoading = true;
+    this.error = null;
+    this.successMessage = null;
+    
+    const newTagName = this.newTagInput.trim();
+    
+    this.candidatureService.createTag(newTagName).subscribe({
+      next: (newTag) => {
+        console.log('Nouveau tag créé:', newTag);
+        this.availableTags.push(newTag);
+        this.newTagInput = '';
+        
+        // Ajouter automatiquement le nouveau tag à la candidature
+        this.candidatureService.addTagToCandidature(newTag.id, this.candidatureId).subscribe({
+          next: (response) => {
+            this.selectedTags.push(newTag);
+            console.log('Nouveau tag ajouté à la candidature:', response);
+            this.successMessage = `Tag "${newTag.tag}" créé et ajouté avec succès`;
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Erreur lors de l\'ajout du nouveau tag:', err);
+            this.error = `Tag créé mais impossible de l'ajouter à la candidature`;
+            this.isLoading = false;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création du tag:', err);
+        this.error = `Impossible de créer le tag "${newTagName}"`;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Actions directes
+  setPositif(positif: boolean): void {
+    this.isLoading = true;
+    this.error = null;
+    this.successMessage = null;
+    
+    this.candidatureService.updatePositif(this.candidatureId, positif).subscribe({
+      next: () => {
+        if (this.candidature) {
+          this.candidature.positif = positif;
+          // Mettre à jour le statut closed après avoir mis à jour positif
+          this.candidatureService.updateClosed(this.candidatureId, true).subscribe({
+            next: () => {
+              if (this.candidature) {
+                this.candidature.closed = true;
+              }
+              this.successMessage = positif ? 'Candidature acceptée avec succès' : 'Candidature refusée avec succès';
+              
+              // Rediriger vers la liste après un délai
+              setTimeout(() => {
+                this.router.navigate(['/liste-candidatures']);
+              }, 1500);
+            },
+            error: (err) => {
+              console.error('Erreur lors de la mise à jour du statut closed', err);
+              this.error = 'Impossible de finaliser la mise à jour du statut';
+              this.isLoading = false;
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de la mise à jour du statut', err);
+        this.error = 'Impossible de mettre à jour le statut';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  assignToMember(): void {
+    if (this.selectedMemberId === undefined) return;
+    
+    this.isLoading = true;
+    this.candidatureService.assignToCandidature(this.candidatureId, this.selectedMemberId).subscribe({
+      next: () => {
+        if (this.candidature) {
+          this.candidature.assigneeId = this.selectedMemberId;
+        }
+        this.successMessage = 'Candidature assignée avec succès';
+        this.isLoading = false;
+        
+        // Recharger la candidature pour mettre à jour les données
+        this.refreshCandidature();
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'assignation', err);
+        this.error = 'Impossible d\'assigner la candidature';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private refreshCandidature(): void {
+    setTimeout(() => {
+      this.candidatureService.getCandidature(this.candidatureId).subscribe({
+        next: (data) => {
+          if (data) {
+            this.candidature = data;
+            this.selectedTags = data.tagList || [];
+            this.selectedMemberId = data.assigneeId;
+          }
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Erreur lors du rafraîchissement des données', err);
+          this.error = 'Impossible de rafraîchir les données';
+          this.isLoading = false;
+        }
+      });
+    }, 500);
   }
 
   ngOnDestroy(): void {

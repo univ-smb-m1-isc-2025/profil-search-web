@@ -32,11 +32,10 @@
       <li *ngIf="currentUser" class="mt-4">
         <div class="px-4 py-3 bg-gray-100 rounded-md mx-2">
           <div class="flex items-center mb-2">
-            <img *ngIf="currentUser.picture" [src]="currentUser.picture" alt="Avatar" class="w-8 h-8 rounded-full mr-2">
-            <div *ngIf="!currentUser.picture" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white mr-2">
-              {{ currentUser.name.charAt(0) }}
+            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white mr-2">
+              {{ currentUser.name ? currentUser.name.charAt(0) : 'U' }}
             </div>
-            <p class="text-sm font-medium">{{ currentUser.name }}</p>
+            <p class="text-sm font-medium">{{ currentUser.name || 'Utilisateur' }}</p>
           </div>
           <button 
             (click)="logout()" 

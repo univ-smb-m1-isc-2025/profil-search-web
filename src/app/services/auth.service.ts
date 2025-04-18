@@ -43,6 +43,12 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  isLoggedIn(): Observable<boolean> {
+    return this.currentUser$.pipe(
+      map(user => !!user)
+    );
+  }
+
   loginWithGoogle(googleResponse: any): void {
     // Extraire les informations de l'utilisateur de la réponse Google
     // Dans un environnement réel, ceci serait validé côté serveur

@@ -50,4 +50,30 @@ export class EmailService {
       })
     );
   }
+
+  sendDeletionEmail(
+    email: string,
+    name: string,
+    candidatureId: number
+  ): Observable<boolean> {
+    const deletionUrl = `${window.location.origin}/candidature/delete/${candidatureId}`;
+    
+    const templateParams: EmailParams = {
+      to_email: email,
+      to_name: name,
+      subject: 'Confirmation de votre candidature',
+      message: `Votre candidature a été enregistrée avec succès. Si vous souhaitez la supprimer, vous pouvez utiliser ce lien : ${deletionUrl}`,
+      company_name: 'ProfilSearch'
+    };
+
+    return from(
+      emailjs.send(this.SERVICE_ID, this.TEMPLATE_ID, templateParams)
+    ).pipe(
+      map(() => true),
+      catchError(error => {
+        console.error('Erreur lors de l\'envoi de l\'email:', error);
+        throw error;
+      })
+    );
+  }
 } 

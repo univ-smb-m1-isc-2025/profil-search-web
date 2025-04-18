@@ -3,11 +3,17 @@
   
   <div class="flex-1 ml-64">
     <main class="container mx-auto px-4 py-8">
-      <h1 class="text-2xl font-bold mb-6">Revoir la candidature</h1>
+      <h1 class="text-2xl font-bold mb-6">Revoir la candidature {{ candidature?.emailCandidat }}</h1>
       
       <!-- Indicateur de chargement -->
       <div *ngIf="isLoading" class="flex justify-center my-8">
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+
+      <!-- Message d'erreur d'authentification -->
+      <div *ngIf="authError" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <p>{{ authError }}</p>
+        <a routerLink="/connexion" class="mt-2 text-sm font-medium underline">Se connecter</a>
       </div>
 
       <!-- Message d'erreur -->
@@ -25,98 +31,128 @@
       <div *ngIf="candidature && !isLoading && !error" class="bg-white p-6 rounded-lg shadow-md">
         <!-- En-tête avec infos de base -->
         <div class="mb-6 pb-4 border-b border-gray-200">
-          <h2 class="text-xl font-semibold mb-2">{{ candidature.offre?.titre }}</h2>
-          <p class="text-gray-600 mb-2">{{ candidature.offre?.entreprise }}</p>
-          <p class="text-gray-700">Candidat: {{ candidature.mailCandidat }}</p>
+          <h2 class="text-xl font-semibold mb-2">Candidature #{{ candidature.id }}</h2>
+          <p class="text-gray-600 mb-2">Offre #{{ candidature.offreId }}</p>
+          <p class="text-gray-700">Candidat: {{ candidature.emailCandidat }}</p>
+          
+          <!-- Statut -->
+          <div class="mt-2">
+            <span 
+              class="px-2 py-1 rounded-full text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': candidature.closed && candidature.positif,
+                'bg-red-100 text-red-800': candidature.closed && !candidature.positif,
+                'bg-yellow-100 text-yellow-800': !candidature.closed
+              }"
+            >
+              {{ candidature.closed ? (candidature.positif ? 'Acceptée' : 'Refusée') : 'En cours' }}
+            </span>
+          </div>
         </div>
         
-        <!-- Bullet points de l'offre -->
-        <div class="mb-6">
-          <h3 class="text-lg font-medium mb-2">Détails du poste</h3>
-          <ul class="list-disc pl-5">
-            <li *ngFor="let point of candidature.offre?.bulletPoints" class="text-gray-700 mb-1">
-              {{ point.bulletPoint }}
-            </li>
-          </ul>
+        <!-- Questions et réponses -->
+        <div *ngIf="candidature.questionReponses && candidature.questionReponses.length > 0" class="mb-6">
+          <h3 class="text-lg font-medium mb-2">Réponses du candidat</h3>
+          <div *ngFor="let qr of candidature.questionReponses" class="mb-3 pb-2 border-b border-gray-100">
+            <p class="text-sm font-semibold">{{ qr.question_text }}</p>
+            <p class="text-gray-700">{{ qr.reponse }}</p>
+          </div>
         </div>
         
         <!-- Formulaire de revue -->
         <div class="space-y-6">
-          <!-- Commentaire -->
-          <div>
-            <label for="commentaire" class="block text-sm font-medium text-gray-700 mb-1">Commentaire</label>
-            <textarea 
-              id="commentaire" 
-              rows="4" 
-              [(ngModel)]="commentaire"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            ></textarea>
-          </div>
-          
           <!-- Tags -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tag</label>
-            <div class="flex flex-wrap gap-2 mb-2">
-              <button 
-                *ngFor="let tag of availableTags" 
-                (click)="toggleTag(tag)"
-                class="px-3 py-1 rounded-full text-xs font-medium"
-                [ngClass]="isTagSelected(tag.id) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-              >
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <!-- Liste des tags existants -->
+            <div class="mb-3">
+              <div *ngFor="let tag of selectedTags" class="text-gray-600 py-1">
                 {{ tag.tag }}
-              </button>
+              </div>
             </div>
             
             <!-- Ajouter un nouveau tag -->
-            <div class="flex mt-2">
+            <div class="flex">
               <input 
                 type="text" 
                 [(ngModel)]="newTagInput" 
                 placeholder="Nouveau tag"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
               />
               <button 
                 (click)="addNewTag()"
-                class="px-4 py-2 bg-gray-200 border border-gray-300 rounded-r-md text-gray-700 hover:bg-gray-300"
+                [disabled]="!newTagInput.trim()"
+                class="px-4 py-2 bg-gray-200 border border-gray-300 rounded-r-md text-gray-700 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 +
               </button>
             </div>
           </div>
           
-          <!-- Prochaine action -->
+          <!-- Assigner à un membre -->
           <div>
-            <label for="prochaineAction" class="block text-sm font-medium text-gray-700 mb-1">Prochaine action</label>
-            <input 
-              type="text" 
-              id="prochaineAction" 
-              [(ngModel)]="prochaineAction"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          
-          <!-- Réponse -->
-          <div>
-            <label for="reponse" class="block text-sm font-medium text-gray-700 mb-1">Réponse</label>
+            <label for="membre" class="block text-sm font-medium text-gray-700 mb-1">Prochain intervenant</label>
             <select 
-              id="reponse" 
-              [(ngModel)]="reponse"
+              id="membre" 
+              [(ngModel)]="selectedMemberId"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">En attente</option>
-              <option value="Positive">Positive</option>
-              <option value="Negative">Négative</option>
+              <option [value]="null">Non assigné</option>
+              <option *ngFor="let member of members" [value]="member.id">
+                {{ member.prenom }} {{ member.nom }} ({{ member.email }})
+              </option>
             </select>
+            
+            <button 
+              *ngIf="selectedMemberId && candidature.assigneeId !== selectedMemberId"
+              (click)="assignToMember()"
+              class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Assigner
+            </button>
           </div>
           
-          <!-- Bouton de soumission -->
-          <div class="flex justify-end">
-            <button 
-              (click)="terminerRevue()"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Terminer la revue
-            </button>
+          <!-- Actions -->
+          <div class="pt-4 border-t border-gray-200">
+            <h3 class="text-lg font-medium mb-2">Actions</h3>
+            <div class="flex flex-wrap gap-3">
+              <button 
+                (click)="setPositif(true)" 
+                [disabled]="isLoading"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
+              >
+                <span *ngIf="!isLoading">Accepter</span>
+                <span *ngIf="isLoading" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Traitement...
+                </span>
+              </button>
+              
+              <button 
+                (click)="setPositif(false)" 
+                [disabled]="isLoading"
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400 disabled:cursor-not-allowed"
+              >
+                <span *ngIf="!isLoading">Refuser</span>
+                <span *ngIf="isLoading" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Traitement...
+                </span>
+              </button>
+              
+              <a 
+                routerLink="/liste-candidatures"
+                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Retour à la liste
+              </a>
+            </div>
           </div>
         </div>
       </div>

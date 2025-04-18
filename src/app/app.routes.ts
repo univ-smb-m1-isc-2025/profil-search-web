@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { CandidatureDeleteComponent } from './pages/candidature-delete/candidature-delete.component';
 
 export const routes: Routes = [
   {
@@ -47,5 +48,9 @@ export const routes: Routes = [
       import('./pages/candidature-detail/candidature-detail.component')
         .then(m => m.CandidatureDetailComponent),
     data: { prefetchStrategy: 'viewport' }
+  },
+  {
+    path: 'candidature/delete/:id',
+    component: CandidatureDeleteComponent
   }
 ];

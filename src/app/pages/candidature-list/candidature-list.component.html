@@ -28,6 +28,12 @@
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
 
+      <!-- Message d'erreur d'authentification -->
+      <div *ngIf="authError" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <p>{{ authError }}</p>
+        <a routerLink="/connexion" class="mt-2 text-sm font-medium underline">Se connecter</a>
+      </div>
+
       <!-- Message d'erreur -->
       <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
         <p>{{ error }}</p>
@@ -40,23 +46,24 @@
           <div class="flex justify-between items-start">
             <div>
               <h2 class="text-xl font-semibold mb-2">
-                {{ candidature.offre?.titre }}
+                {{ getOffreTitle(candidature) }}
               </h2>
-              <p class="text-gray-600 mb-1">{{ candidature.offre?.entreprise }}</p>
-              <p class="text-gray-600 mb-2">Candidature de: {{ candidature.mailCandidat }}</p>
+              <p class="text-gray-600 mb-1">{{ getOffreEntreprise(candidature) }}</p>
+              <p class="text-gray-600 mb-2">Candidature de: {{ candidature.emailCandidat || candidature.name }}</p>
               
-              <!-- Bullet points -->
-              <ul class="list-disc pl-5 mb-4">
-                <li *ngFor="let point of candidature.offre?.bulletPoints" class="text-gray-700">
-                  {{ point.bulletPoint }}
-                </li>
-              </ul>
+              <!-- Questions et réponses -->
+              <div *ngIf="candidature.questionReponses && candidature.questionReponses.length > 0" class="mb-4">
+                <div *ngFor="let qr of candidature.questionReponses" class="mb-2">
+                  <p class="text-sm font-semibold">{{ qr.question_text }}</p>
+                  <p class="text-gray-700">{{ qr.reponse }}</p>
+                </div>
+              </div>
               
               <!-- Tags -->
               <div class="flex flex-wrap gap-2 mb-4">
                 <span 
-                  *ngFor="let tag of candidature.tags" 
-                  class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                  *ngFor="let tag of candidature.tagList" 
+                  class="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded"
                 >
                   {{ tag.tag }}
                 </span>
@@ -67,12 +74,12 @@
               <span 
                 class="px-2 py-1 rounded-full text-xs font-medium mb-2"
                 [ngClass]="{
-                  'bg-green-100 text-green-800': candidature.estClo && candidature.positif,
-                  'bg-red-100 text-red-800': candidature.estClo && !candidature.positif,
-                  'bg-yellow-100 text-yellow-800': !candidature.estClo
+                  'bg-green-100 text-green-800': candidature.closed && candidature.positif,
+                  'bg-red-100 text-red-800': candidature.closed && !candidature.positif,
+                  'bg-yellow-100 text-yellow-800': !candidature.closed
                 }"
               >
-                {{ candidature.estClo ? (candidature.positif ? 'Acceptée' : 'Refusée') : 'En cours' }}
+                {{ candidature.closed ? (candidature.positif ? 'Acceptée' : 'Refusée') : 'En cours' }}
               </span>
               
               <a 
