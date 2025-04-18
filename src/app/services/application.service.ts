@@ -103,6 +103,8 @@ export class ApplicationService {
       }),
       switchMap(candidatureResponse => {
         const candidatureId = candidatureResponse?.id;
+        const deleteToken = candidatureResponse?.deleteToken;
+        
         if (!candidatureId) {
           console.error('Erreur: Pas d\'ID de candidature reçu');
           return of({ success: false, error: 'Erreur lors de la création de la candidature' });
@@ -128,7 +130,7 @@ export class ApplicationService {
               { jobId, answers }
             ]);
           }),
-          map(() => ({ success: true, candidatureId }))
+          map(() => ({ success: true, candidatureId, deleteToken }))
         );
       })
     );
