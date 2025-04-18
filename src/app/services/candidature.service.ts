@@ -127,8 +127,8 @@ export class CandidatureService {
   }
 
   // Supprimer une candidature
-  deleteCandidature(candidatureId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/api/candidatures/delete/${candidatureId}`);
+  deleteCandidature(deleteToken: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/candidatures/delete/${deleteToken}`);
   }
 
   // Récupérer tous les membres

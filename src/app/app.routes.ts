@@ -51,7 +51,7 @@ export const routes: Routes = [
     data: { prefetchStrategy: 'viewport' }
   },
   {
-    path: 'candidature/delete/:id',
+    path: 'candidature/delete/:token',
     component: CandidatureDeleteComponent
   },
   { path: 'offres/create', component: JobCreateComponent },

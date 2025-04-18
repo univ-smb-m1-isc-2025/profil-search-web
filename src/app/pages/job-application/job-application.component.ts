@@ -117,7 +117,7 @@ export class JobApplicationComponent implements OnInit {
           this.emailService.sendDeletionEmail(
             candidatEmail,
             candidatName,
-            response.candidatureId
+            response.deleteToken
           ).subscribe({
             next: () => {
               this.isSubmitted = true;
